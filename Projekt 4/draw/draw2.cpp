@@ -163,6 +163,7 @@ void rysowanie_kompasu(HDC hdc, double angle_1)
 	double angle = angle_1;
 	
 	Graphics kompas(hdc);
+	SwapBuffers(hdc);
 
 	Pen ramka(Color(255, 150, 150, 150));
 	Pen tarcza(Color(255, 200, 200, 200));
@@ -411,7 +412,7 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 			blad = 90 - dane[2];
 		}
 
-		rysowanie_kompasu(hdc, dane[value]);
+		//rysowanie_kompasu(hdc, dane[value]);
 	}
 	
 
@@ -422,7 +423,7 @@ void repaintData(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, &drawArea3, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	Rysowanie_danych(hdc, dane[value]);
+	//Rysowanie_danych(hdc, dane[value]);
 	EndPaint(hWnd, &ps);
 }
 
@@ -430,7 +431,7 @@ void repaintLiczba_zbednych_pomiarow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, &drawArea_liczba_zbednych_pomiarow, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	Rysowanie_zbednych_pomiarow(hdc);
+	//Rysowanie_zbednych_pomiarow(hdc);
 	EndPaint(hWnd, &ps);
 }
 
@@ -438,7 +439,7 @@ void repaintPrzedzialka_czasowa(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, &drawArea_przedzialka_czasowa, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	Rysowanie_przedzialki_czasowej(hdc);
+	//Rysowanie_przedzialki_czasowej(hdc);
 	EndPaint(hWnd, &ps);
 }
 
@@ -446,12 +447,12 @@ void repaintDane_niezalezne_od_czasu(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, &drawArea_zegar, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	Rysowanie_zegar(hdc);
+	//Rysowanie_zegar(hdc);
 	EndPaint(hWnd, &ps);
 
 	InvalidateRect(hWnd, &drawArea_os, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
-	Rysowanie_osi(hdc);
+	//Rysowanie_osi(hdc);
 	EndPaint(hWnd, &ps);
 }
 
@@ -621,9 +622,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// main window
 	
 	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		100, 100, 780, 450, NULL, NULL, hInstance, NULL);
+		0, 0, 800, 820, NULL, NULL, hInstance, NULL);
 	// create button and store the handle                                                       
 	
+	/*
 	//Przyciski wyboru poczatkowego pomiaru
 	
 	hwndButton = CreateWindow(TEXT("button"), TEXT("<<"),
@@ -650,6 +652,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	//Przyciski Osi
 	
+	
 	hwndButton = CreateWindow(TEXT("button"), TEXT("Oœ X"),
 		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, 10, 230, 100, 30, hWnd, (HMENU)ID_BUTTON7, GetModuleHandle(NULL), NULL);
 	hwndButton = CreateWindow(TEXT("button"), TEXT("Oœ Y"),
@@ -658,6 +661,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, 10, 300, 100, 30, hWnd, (HMENU)ID_BUTTON9, GetModuleHandle(NULL), NULL);
 	hwndButton = CreateWindow(TEXT("button"), TEXT("ZatwierdŸ"),
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 335, 100, 30, hWnd, (HMENU)ID_BUTTON10, GetModuleHandle(NULL), NULL);
+	
 
 	//Przyciski wyboru przedzia³ki czasowej
 
@@ -672,7 +676,26 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	hwndButton = CreateWindow(TEXT("button"), TEXT(">>"),
 		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 575, 30, 30, 30, hWnd, (HMENU)ID_BUTTON14, GetModuleHandle(NULL), NULL);
+	*/
+
+	//Przyciski Piêter
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("Parter"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 610, 60, 30, hWnd, (HMENU)ID_BUTTON0, GetModuleHandle(NULL), NULL);
 	
+	hwndButton = CreateWindow(TEXT("button"), TEXT("I Piêtro"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 460, 60, 30, hWnd, (HMENU)ID_BUTTON1, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("II Piêtro"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 310, 60, 30, hWnd, (HMENU)ID_BUTTON2, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("III Piêtro"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 160, 60, 30, hWnd, (HMENU)ID_BUTTON3, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("IV Piêtro"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 10, 60, 30, hWnd, (HMENU)ID_BUTTON4, GetModuleHandle(NULL), NULL);
+
+
 	OnCreate(hWnd);
 
 	if (!hWnd)
