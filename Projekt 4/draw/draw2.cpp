@@ -18,6 +18,7 @@
 #define liczba_danych_w_probce 12
 #define promien_kola_wskazowek 80
 #define liczba_pomiarow 625
+#define ilosc_pieter 5
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -46,8 +47,14 @@ int osie = 0;
 double blad = 0;
 long double zmiana_przedzia³ki = 0.025;
 
+int tablica_oczekujacych[ilosc_pieter];
+
+
+
+
 // Dane z pliku
 std::vector<double> dane;
+using namespace std;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -55,7 +62,7 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	Buttons(HWND, UINT, WPARAM, LPARAM);
-
+/*
 void Rysowanie_danych(HDC hdc, double angle)
 {
 	Graphics graphics(hdc);
@@ -152,7 +159,50 @@ void Rysowanie_przedzialki_czasowej(HDC hdc)
 
 	graphics.DrawString(liczba_string.c_str(), liczba_string.length(), czcionka, C, &cyfry);
 }
+*/
 
+void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y)
+{
+	Graphics graphics(hdc);
+
+	Pen ludzik(Color(255, 0, 0, 0));
+
+	for (int i = 0; i < 20; i++)graphics.DrawEllipse(&ludzik, jakis_x+15 - (i / 2), jakis_y - (i / 2), i, i);
+
+	for (int j = 0; j <= 5; j++)
+	{
+		graphics.DrawRectangle(&ludzik, jakis_x, jakis_y + 10, 30, j);
+		graphics.DrawRectangle(&ludzik, jakis_x, jakis_y + 10, j, 20);
+		graphics.DrawRectangle(&ludzik, jakis_x+25, jakis_y + 10, j, 20);
+		graphics.DrawRectangle(&ludzik, jakis_x + 8, jakis_y + 35, j, 25);
+		graphics.DrawRectangle(&ludzik, jakis_x + 17, jakis_y + 35, j, 25);
+	}
+
+	for (int j = 0; j <= 14; j++)graphics.DrawRectangle(&ludzik, jakis_x + 8, jakis_y + 15, j, 20);
+};
+
+void rysowanie_pieter(HDC hdc)
+{
+	Graphics graphics(hdc);
+
+	Pen pietra(Color(255, 0, 0, 0));
+
+	for (int i = 0; i <= 600; i = i + 150)
+	{
+		for (int j = 0; j < 6; j++)graphics.DrawRectangle(&pietra, 0, 750 - i, 250, j);
+	};
+
+	for (int i = 0; i < 6; i++)
+	{
+		graphics.DrawRectangle(&pietra, 250, 10, i, 745);
+		graphics.DrawRectangle(&pietra, 450, 10, i, 745);
+		graphics.DrawRectangle(&pietra, 255, 750, 200, i);
+		graphics.DrawRectangle(&pietra, 255, 10, 200, i);
+	}
+	
+	
+};
+/*
 void rysowanie_kompasu(HDC hdc, double angle_1)
 {
 	angle_1 = angle_1 + blad;
@@ -396,29 +446,44 @@ void rysowanie_kompasu(HDC hdc, double angle_1)
 	//Rysowanie srodka
 	for (int i = 0; i < 10; i++)kompas.DrawEllipse(&srodek, 300 - (i / 2), 200 - (i / 2), i, i);
 }
-
+*/
 void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 {
 	if (drawArea==NULL)
 		InvalidateRect(hWnd, NULL, TRUE); // repaint all
 	else
-		InvalidateRect(hWnd, drawArea, TRUE); //repaint drawArea
+		InvalidateRect(hWnd, NULL, TRUE); //repaint drawArea
 	hdc = BeginPaint(hWnd, &ps);
-	
-	if (dane.size() > value)
-	{
-		if (dane.size() > 2)
-		{
-			blad = 90 - dane[2];
-		}
 
-		//rysowanie_kompasu(hdc, dane[value]);
-	}
+	rysowanie_pieter(hdc);
 	
-
 	EndPaint(hWnd, &ps);
 }
 
+void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int tablica_oczekujacych[] )
+{
+	RECT drawArea;
+
+	for (int i = 0; i < 5; i++) 
+	{
+		if (tablica_oczekujacych[i] > 0)
+		{
+			for (int j = 0; j < tablica_oczekujacych[i]; j++)
+			{
+				drawArea = { 5 + j * 40, 675 - i * 150, 35 + j * 40, 745 - i * 150 };
+				
+				InvalidateRect(hWnd, &drawArea, TRUE);
+				hdc = BeginPaint(hWnd, &ps);
+
+				rysowanie_ludzika(hdc, 5+j*40, 685-i*150);
+
+				EndPaint(hWnd, &ps);
+			}
+		}
+	}
+}
+
+/*
 void repaintData(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	InvalidateRect(hWnd, &drawArea3, TRUE);
@@ -455,7 +520,7 @@ void repaintDane_niezalezne_od_czasu(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 	//Rysowanie_osi(hdc);
 	EndPaint(hWnd, &ps);
 }
-
+*/
 int otwieranie_pliku(std::fstream &plik_dane)
 {
 	if (!plik_dane)
@@ -505,6 +570,7 @@ int OnCreate(HWND window)
 	plik_dane.open("D:\\outputCatapult01.log", std::ios::in);
 	dane.push_back(90);
 	dane.push_back(90);
+
 	return 0;
 }
 
@@ -622,7 +688,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// main window
 	
 	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		0, 0, 800, 820, NULL, NULL, hInstance, NULL);
+		0, 0, 477, 820, NULL, NULL, hInstance, NULL);
 	// create button and store the handle                                                       
 	
 	/*
@@ -741,33 +807,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
+		case ID_BUTTON0:
+			tablica_oczekujacych[0]++;
+			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			break;
 		case ID_BUTTON1 :
-			if (liczba_zbednych_pomiarow >= 5)
-			{
-				liczba_zbednych_pomiarow = liczba_zbednych_pomiarow - 5;
-				repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-			}
+			tablica_oczekujacych[1]++;
+			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
 			break;
 		case ID_BUTTON2:
-			if (liczba_zbednych_pomiarow > 0)
-			{
-				liczba_zbednych_pomiarow = liczba_zbednych_pomiarow - 1;
-				repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-			}
+			tablica_oczekujacych[2]++;
+			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
 			break;
 		case ID_BUTTON3:
-			if (liczba_zbednych_pomiarow < liczba_pomiarow)
-			{
-				liczba_zbednych_pomiarow = liczba_zbednych_pomiarow + 1;
-				repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-			}
+			tablica_oczekujacych[3]++;
+			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
 			break;
 		case ID_BUTTON4:
-			if ((liczba_zbednych_pomiarow+4) < liczba_pomiarow)
-			{
-				liczba_zbednych_pomiarow = liczba_zbednych_pomiarow + 5;
-				repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-			}
+			tablica_oczekujacych[4]++;
+			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
 			break;
 		case ID_BUTTON5:
 			if (pauza == true)
@@ -805,28 +863,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if(zmiana_przedzia³ki >= 0.15000)
 			{
 				zmiana_przedzia³ki = zmiana_przedzia³ki - 0.125;
-				repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 			}
 			break;
 		case ID_BUTTON12:
 			if(zmiana_przedzia³ki >= 0.05000)
 			{
 				zmiana_przedzia³ki = zmiana_przedzia³ki - 0.025;
-				repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 			}
 			break;
 		case ID_BUTTON13:
 			if ((liczba_pomiarow - liczba_zbednych_pomiarow) / (value + (zmiana_przedzia³ki + 0.025) / 0.025) > 1)
 			{
 				zmiana_przedzia³ki = zmiana_przedzia³ki + 0.025;
-				repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 			}
 			break;
 		case ID_BUTTON14:
 			if ((liczba_pomiarow - liczba_zbednych_pomiarow) / (value + (zmiana_przedzia³ki + 0.125) / 0.025) > 1)
 			{
 				zmiana_przedzia³ki = zmiana_przedzia³ki + 0.125;
-				repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 			}
 			break;
 
@@ -839,9 +897,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// TODO: Add any drawing code here (not depend on timer, buttons)
 		repaintWindow(hWnd, hdc, ps, NULL);
 		//repaintData(hWnd, hdc, ps);
-		repaintDane_niezalezne_od_czasu(hWnd, hdc, ps);
-		repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-		repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+		//repaintDane_niezalezne_od_czasu(hWnd, hdc, ps);
+		//repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
+		//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -858,7 +916,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (dane.size() > value)
 			{
 				if(value > 2)repaintWindow(hWnd, hdc, ps, &drawArea2);
-				repaintData(hWnd, hdc, ps);
+				//repaintData(hWnd, hdc, ps);
 				Sleep(24 + (zmiana_przedzia³ki-0.025)*1000);
 				value=value+(zmiana_przedzia³ki/0.025);
 			}
