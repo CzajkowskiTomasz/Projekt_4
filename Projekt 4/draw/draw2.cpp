@@ -47,7 +47,9 @@ int osie = 0;
 double blad = 0;
 long double zmiana_przedzia³ki = 0.025;
 
-int tablica_oczekujacych[ilosc_pieter];
+int tablica_oczekujacych[ilosc_pieter] = { 0 };
+int numer_pietra_ludzik = 0;
+int aktualny_numer_pietra_ludzik = 0;
 
 
 
@@ -166,6 +168,7 @@ void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y)
 	Graphics graphics(hdc);
 
 	Pen ludzik(Color(255, 0, 0, 0));
+	Pen cyfry(Color(255, 255, 255, 255));
 
 	for (int i = 0; i < 20; i++)graphics.DrawEllipse(&ludzik, jakis_x+15 - (i / 2), jakis_y - (i / 2), i, i);
 
@@ -179,6 +182,40 @@ void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y)
 	}
 
 	for (int j = 0; j <= 14; j++)graphics.DrawRectangle(&ludzik, jakis_x + 8, jakis_y + 15, j, 20);
+
+	if (numer_pietra_ludzik == 0)
+	{
+		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 18 - (i / 2), 4 + i, 8 + i, 0, 360);
+	};
+
+	if (numer_pietra_ludzik == 1)
+	{
+		for (int i = 0; i < 2; i++)graphics.DrawRectangle(&cyfry, jakis_x + 17, jakis_y + 18, i, 12);
+		for(int i = 0; i<3; i++)graphics.DrawLine(&cyfry, jakis_x + 13, jakis_y + 22+ i, jakis_x + 18, jakis_y + 17 + i);
+	};
+
+	if (numer_pietra_ludzik == 2)
+	{
+		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 18 - (i / 2), 4 + i, 4 + i, 180, 180);
+		for (int i = 0; i < 2; i++)graphics.DrawRectangle(&cyfry, jakis_x + 11, jakis_y + 28, 9, i);
+		for (int i = 0; i < 3; i++)graphics.DrawLine(&cyfry, jakis_x + 12, jakis_y + 27 + i, jakis_x + 20, jakis_y + 19 + i);
+	};
+
+	if (numer_pietra_ludzik == 3)
+	{
+		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 16 - (i / 2), 4 + i, 4 + i, 190, 270);
+		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 25 - (i / 2), 4 + i, 4 + i, 270, 270);
+	};
+
+	if (numer_pietra_ludzik == 4)
+	{
+		for (int i = 0; i < 2; i++)
+		{
+			graphics.DrawRectangle(&cyfry, jakis_x + 17, jakis_y + 20, i, 12);
+			graphics.DrawRectangle(&cyfry, jakis_x + 12, jakis_y + 26, 8, i);
+		}
+		for (int i = 0; i < 3; i++)graphics.DrawLine(&cyfry, jakis_x + 12, jakis_y + 26 + i, jakis_x + 18, jakis_y + 17 + i);
+	};
 };
 
 void rysowanie_pieter(HDC hdc)
@@ -460,26 +497,20 @@ void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
 	EndPaint(hWnd, &ps);
 }
 
-void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int tablica_oczekujacych[] )
+void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	RECT drawArea;
 
-	for (int i = 0; i < 5; i++) 
+	if (tablica_oczekujacych[aktualny_numer_pietra_ludzik] > 0)
 	{
-		if (tablica_oczekujacych[i] > 0)
-		{
-			for (int j = 0; j < tablica_oczekujacych[i]; j++)
-			{
-				drawArea = { 5 + j * 40, 675 - i * 150, 35 + j * 40, 745 - i * 150 };
+		drawArea = { tablica_oczekujacych[aktualny_numer_pietra_ludzik] * 40 - 35, 675 - aktualny_numer_pietra_ludzik * 150, tablica_oczekujacych[aktualny_numer_pietra_ludzik] * 40 - 5, 745 - aktualny_numer_pietra_ludzik * 150 };
 				
-				InvalidateRect(hWnd, &drawArea, TRUE);
-				hdc = BeginPaint(hWnd, &ps);
+		InvalidateRect(hWnd, &drawArea, TRUE);
+		hdc = BeginPaint(hWnd, &ps);
 
-				rysowanie_ludzika(hdc, 5+j*40, 685-i*150);
+		rysowanie_ludzika(hdc, tablica_oczekujacych[aktualny_numer_pietra_ludzik] *40 - 35, 685-aktualny_numer_pietra_ludzik*150);
 
-				EndPaint(hWnd, &ps);
-			}
-		}
+		EndPaint(hWnd, &ps);
 	}
 }
 
@@ -808,24 +839,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DestroyWindow(hWnd);
 			break;
 		case ID_BUTTON0:
+			numer_pietra_ludzik = 0;
+			aktualny_numer_pietra_ludzik = 0;
 			tablica_oczekujacych[0]++;
-			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			repaint_ludzik(hWnd, hdc, ps);
 			break;
 		case ID_BUTTON1 :
+			numer_pietra_ludzik = 1;
+			aktualny_numer_pietra_ludzik = 1;
 			tablica_oczekujacych[1]++;
-			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			repaint_ludzik(hWnd, hdc, ps);
 			break;
 		case ID_BUTTON2:
+			numer_pietra_ludzik = 2;
+			aktualny_numer_pietra_ludzik = 2;
 			tablica_oczekujacych[2]++;
-			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			repaint_ludzik(hWnd, hdc, ps);
 			break;
 		case ID_BUTTON3:
+			numer_pietra_ludzik = 3;
+			aktualny_numer_pietra_ludzik = 3;
 			tablica_oczekujacych[3]++;
-			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			repaint_ludzik(hWnd, hdc, ps);
 			break;
 		case ID_BUTTON4:
+			numer_pietra_ludzik = 4;
+			aktualny_numer_pietra_ludzik = 4;
 			tablica_oczekujacych[4]++;
-			repaint_ludzik(hWnd, hdc, ps, tablica_oczekujacych);
+			repaint_ludzik(hWnd, hdc, ps);
 			break;
 		case ID_BUTTON5:
 			if (pauza == true)
