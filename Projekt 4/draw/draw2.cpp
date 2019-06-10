@@ -10,6 +10,7 @@
 #include <math.h>
 #include <gdiplus.h>
 #include <string>
+#include <vector>
 
 #define MAX_LOADSTRING 100
 #define TMR_1 1
@@ -18,7 +19,11 @@
 #define liczba_danych_w_probce 12
 #define promien_kola_wskazowek 80
 #define liczba_pomiarow 625
+
 #define ilosc_pieter 5
+#define maksymalna_ilosc_oczekujacych 10
+#define maksymalny_udzwig_windy 600 //w kg
+#define srednia_waga_czlowieka 70   //w kg
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -47,9 +52,9 @@ int osie = 0;
 double blad = 0;
 long double zmiana_przedzia³ki = 0.025;
 
-int tablica_oczekujacych[ilosc_pieter] = { 0 };
-int numer_pietra_ludzik = 0;
-int aktualny_numer_pietra_ludzik = 0;
+int tablica_oczekujacych[ilosc_pieter][maksymalna_ilosc_oczekujacych];
+int aktualny_numer_pietra_ludzik= 0;
+int pozycja = 0;
 
 
 
@@ -163,7 +168,7 @@ void Rysowanie_przedzialki_czasowej(HDC hdc)
 }
 */
 
-void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y)
+void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y, int numer_ludzika)
 {
 	Graphics graphics(hdc);
 
@@ -183,31 +188,31 @@ void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y)
 
 	for (int j = 0; j <= 14; j++)graphics.DrawRectangle(&ludzik, jakis_x + 8, jakis_y + 15, j, 20);
 
-	if (numer_pietra_ludzik == 0)
+	if (numer_ludzika == 0)
 	{
 		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 18 - (i / 2), 4 + i, 8 + i, 0, 360);
 	};
 
-	if (numer_pietra_ludzik == 1)
+	if (numer_ludzika == 1)
 	{
 		for (int i = 0; i < 2; i++)graphics.DrawRectangle(&cyfry, jakis_x + 17, jakis_y + 18, i, 12);
 		for(int i = 0; i<3; i++)graphics.DrawLine(&cyfry, jakis_x + 13, jakis_y + 22+ i, jakis_x + 18, jakis_y + 17 + i);
 	};
 
-	if (numer_pietra_ludzik == 2)
+	if (numer_ludzika == 2)
 	{
 		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 18 - (i / 2), 4 + i, 4 + i, 180, 180);
 		for (int i = 0; i < 2; i++)graphics.DrawRectangle(&cyfry, jakis_x + 11, jakis_y + 28, 9, i);
 		for (int i = 0; i < 3; i++)graphics.DrawLine(&cyfry, jakis_x + 12, jakis_y + 27 + i, jakis_x + 20, jakis_y + 19 + i);
 	};
 
-	if (numer_pietra_ludzik == 3)
+	if (numer_ludzika == 3)
 	{
 		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 16 - (i / 2), 4 + i, 4 + i, 190, 270);
 		for (int i = 4; i < 7; i++)graphics.DrawArc(&cyfry, jakis_x + 13 - (i / 2), jakis_y + 25 - (i / 2), 4 + i, 4 + i, 270, 270);
 	};
 
-	if (numer_pietra_ludzik == 4)
+	if (numer_ludzika == 4)
 	{
 		for (int i = 0; i < 2; i++)
 		{
@@ -224,19 +229,48 @@ void rysowanie_pieter(HDC hdc)
 
 	Pen pietra(Color(255, 0, 0, 0));
 
+	Gdiplus::Font *czcionka = new Font(L"Times new roman", 12);
+
+	Gdiplus::SolidBrush litery(Gdiplus::Color(255, 0, 0, 0));
+
+	PointF A;
+	
+	for (int i = 0; i < 5; i++)
+	{
+		A = PointF(5, 15 + 150 * i);
+		graphics.DrawString(L"Wybór piêtra:", 13, czcionka, A, &litery);
+	}
+		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 15);
+		graphics.DrawString(L"4 Piêtro", 8, czcionka, A, &litery);
+		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 165);
+		graphics.DrawString(L"3 Piêtro", 8, czcionka, A, &litery);
+		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 315);
+		graphics.DrawString(L"2 Piêtro", 8, czcionka, A, &litery);
+		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 465);
+		graphics.DrawString(L"1 Piêtro", 8, czcionka, A, &litery);
+		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 615);
+		graphics.DrawString(L"Parter", 6, czcionka, A, &litery);
+
+//Podloga oczekujacych
 	for (int i = 0; i <= 600; i = i + 150)
 	{
-		for (int j = 0; j < 6; j++)graphics.DrawRectangle(&pietra, 0, 750 - i, 250, j);
+		for (int j = 0; j < 6; j++)graphics.DrawRectangle(&pietra, 0, 750 - i, 10 + maksymalna_ilosc_oczekujacych * 40, j);
 	};
 
+//Szyb
 	for (int i = 0; i < 6; i++)
 	{
-		graphics.DrawRectangle(&pietra, 250, 10, i, 745);
-		graphics.DrawRectangle(&pietra, 450, 10, i, 745);
-		graphics.DrawRectangle(&pietra, 255, 750, 200, i);
-		graphics.DrawRectangle(&pietra, 255, 10, 200, i);
+		graphics.DrawRectangle(&pietra, 10 + maksymalna_ilosc_oczekujacych * 40, 10, i, 745);
+		graphics.DrawRectangle(&pietra, 25 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy/srednia_waga_czlowieka)*40, 10, i, 745);
+		graphics.DrawRectangle(&pietra, 15 + maksymalna_ilosc_oczekujacych * 40, 750, 10 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, i);
+		graphics.DrawRectangle(&pietra, 15 + maksymalna_ilosc_oczekujacych * 40, 10, 10 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, i);
 	}
 	
+//Podloga wychodzacych
+	for (int i = 0; i <= 600; i = i + 150)
+	{
+		for (int j = 0; j < 6; j++)graphics.DrawRectangle(&pietra, 30 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 750 - i, 130, j);
+	};
 	
 };
 /*
@@ -501,14 +535,14 @@ void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	RECT drawArea;
 
-	if (tablica_oczekujacych[aktualny_numer_pietra_ludzik] > 0)
+	if (pozycja < maksymalna_ilosc_oczekujacych)
 	{
-		drawArea = { tablica_oczekujacych[aktualny_numer_pietra_ludzik] * 40 - 35, 675 - aktualny_numer_pietra_ludzik * 150, tablica_oczekujacych[aktualny_numer_pietra_ludzik] * 40 - 5, 745 - aktualny_numer_pietra_ludzik * 150 };
+		drawArea = { pozycja * 40 + 5, 675 - aktualny_numer_pietra_ludzik * 150, pozycja * 40 + 35, 745 - aktualny_numer_pietra_ludzik * 150 };
 				
 		InvalidateRect(hWnd, &drawArea, TRUE);
 		hdc = BeginPaint(hWnd, &ps);
 
-		rysowanie_ludzika(hdc, tablica_oczekujacych[aktualny_numer_pietra_ludzik] *40 - 35, 685-aktualny_numer_pietra_ludzik*150);
+		rysowanie_ludzika(hdc, pozycja *40 + 5, 685-aktualny_numer_pietra_ludzik*150, tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja]);
 
 		EndPaint(hWnd, &ps);
 	}
@@ -598,10 +632,11 @@ int otwieranie_pliku(std::fstream &plik_dane)
 
 int OnCreate(HWND window)
 {
-	plik_dane.open("D:\\outputCatapult01.log", std::ios::in);
-	dane.push_back(90);
-	dane.push_back(90);
-
+	//std::vector<int> tablica_oczekujacych;
+	for (int i = 0; i < ilosc_pieter; i++)
+	{
+		for (int j = 0; j < maksymalna_ilosc_oczekujacych; j++)tablica_oczekujacych[i][j] = -1;
+	}
 	return 0;
 }
 
@@ -719,7 +754,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	// main window
 	
 	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		0, 0, 477, 820, NULL, NULL, hInstance, NULL);
+		0, 0, 160 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 820, NULL, NULL, hInstance, NULL);
 	// create button and store the handle                                                       
 	
 	/*
@@ -777,21 +812,70 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	//Przyciski Piêter
 
-	hwndButton = CreateWindow(TEXT("button"), TEXT("Parter"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 610, 60, 30, hWnd, (HMENU)ID_BUTTON0, GetModuleHandle(NULL), NULL);
+	//Parter
+	hwndButton = CreateWindow(TEXT("button"), TEXT("1"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 615, 20, 20, hWnd, (HMENU)ID_BUTTON_01, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("2"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 615, 20, 20, hWnd, (HMENU)ID_BUTTON_02, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("3"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 615, 20, 20, hWnd, (HMENU)ID_BUTTON_03, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("4"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 615, 20, 20, hWnd, (HMENU)ID_BUTTON_04, GetModuleHandle(NULL), NULL);
+
+	//1 Pietro
+	hwndButton = CreateWindow(TEXT("button"), TEXT("0"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 465, 20, 20, hWnd, (HMENU)ID_BUTTON_10, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("2"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 465, 20, 20, hWnd, (HMENU)ID_BUTTON_12, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("3"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 465, 20, 20, hWnd, (HMENU)ID_BUTTON_13, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("4"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 465, 20, 20, hWnd, (HMENU)ID_BUTTON_14, GetModuleHandle(NULL), NULL);
+
+	//2 Pietro
+	hwndButton = CreateWindow(TEXT("button"), TEXT("0"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 315, 20, 20, hWnd, (HMENU)ID_BUTTON_20, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("1"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 315, 20, 20, hWnd, (HMENU)ID_BUTTON_21, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("3"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 315, 20, 20, hWnd, (HMENU)ID_BUTTON_23, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("4"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 315, 20, 20, hWnd, (HMENU)ID_BUTTON_24, GetModuleHandle(NULL), NULL);
+
+	//3 Pietro
+	hwndButton = CreateWindow(TEXT("button"), TEXT("0"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 165, 20, 20, hWnd, (HMENU)ID_BUTTON_30, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("1"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 165, 20, 20, hWnd, (HMENU)ID_BUTTON_31, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("2"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 165, 20, 20, hWnd, (HMENU)ID_BUTTON_32, GetModuleHandle(NULL), NULL);
+
+	hwndButton = CreateWindow(TEXT("button"), TEXT("4"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 165, 20, 20, hWnd, (HMENU)ID_BUTTON_34, GetModuleHandle(NULL), NULL);
 	
-	hwndButton = CreateWindow(TEXT("button"), TEXT("I Piêtro"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 460, 60, 30, hWnd, (HMENU)ID_BUTTON1, GetModuleHandle(NULL), NULL);
+	//4 Pietro
+	hwndButton = CreateWindow(TEXT("button"), TEXT("0"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_40, GetModuleHandle(NULL), NULL);
 
-	hwndButton = CreateWindow(TEXT("button"), TEXT("II Piêtro"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 310, 60, 30, hWnd, (HMENU)ID_BUTTON2, GetModuleHandle(NULL), NULL);
+	hwndButton = CreateWindow(TEXT("button"), TEXT("1"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_41, GetModuleHandle(NULL), NULL);
 
-	hwndButton = CreateWindow(TEXT("button"), TEXT("III Piêtro"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 160, 60, 30, hWnd, (HMENU)ID_BUTTON3, GetModuleHandle(NULL), NULL);
+	hwndButton = CreateWindow(TEXT("button"), TEXT("2"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_42, GetModuleHandle(NULL), NULL);
 
-	hwndButton = CreateWindow(TEXT("button"), TEXT("IV Piêtro"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 75, 10, 60, 30, hWnd, (HMENU)ID_BUTTON4, GetModuleHandle(NULL), NULL);
-
+	hwndButton = CreateWindow(TEXT("button"), TEXT("3"),
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_43, GetModuleHandle(NULL), NULL);
 
 	OnCreate(hWnd);
 
@@ -838,37 +922,175 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
-		case ID_BUTTON0:
-			numer_pietra_ludzik = 0;
+		
+//Parter
+		case ID_BUTTON_01:
 			aktualny_numer_pietra_ludzik = 0;
-			tablica_oczekujacych[0]++;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 1;
+			repaint_ludzik(hWnd, hdc, ps);
+
+			break;
+		
+		case ID_BUTTON_02:
+			aktualny_numer_pietra_ludzik = 0;
+			pozycja = 0;
+			while(tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 2;
 			repaint_ludzik(hWnd, hdc, ps);
 			break;
-		case ID_BUTTON1 :
-			numer_pietra_ludzik = 1;
+		
+		case ID_BUTTON_03:
+			aktualny_numer_pietra_ludzik = 0;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 3;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+		
+		case ID_BUTTON_04:
+			aktualny_numer_pietra_ludzik = 0;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 4;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+//1 Pietro
+		case ID_BUTTON_10:
 			aktualny_numer_pietra_ludzik = 1;
-			tablica_oczekujacych[1]++;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 0;
 			repaint_ludzik(hWnd, hdc, ps);
 			break;
-		case ID_BUTTON2:
-			numer_pietra_ludzik = 2;
+
+		case ID_BUTTON_12:
+			aktualny_numer_pietra_ludzik = 1;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 2;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_13:
+			aktualny_numer_pietra_ludzik = 1;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 3;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_14:
+			aktualny_numer_pietra_ludzik = 1;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 4;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+//2 Pietro
+		case ID_BUTTON_20:
 			aktualny_numer_pietra_ludzik = 2;
-			tablica_oczekujacych[2]++;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 0;
 			repaint_ludzik(hWnd, hdc, ps);
 			break;
-		case ID_BUTTON3:
-			numer_pietra_ludzik = 3;
+
+		case ID_BUTTON_21:
+			aktualny_numer_pietra_ludzik = 2;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] > 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 1;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_23:
+			aktualny_numer_pietra_ludzik = 2;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 3;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_24:
+			aktualny_numer_pietra_ludzik = 2;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 4;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+//3 Pietro
+		case ID_BUTTON_30:
 			aktualny_numer_pietra_ludzik = 3;
-			tablica_oczekujacych[3]++;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 0;
 			repaint_ludzik(hWnd, hdc, ps);
 			break;
-		case ID_BUTTON4:
-			numer_pietra_ludzik = 4;
+
+		case ID_BUTTON_31:
+			aktualny_numer_pietra_ludzik = 3;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 1;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_32:
+			aktualny_numer_pietra_ludzik = 3;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 2;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_34:
+			aktualny_numer_pietra_ludzik = 3;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 4;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+//4 Pietro
+		case ID_BUTTON_40:
 			aktualny_numer_pietra_ludzik = 4;
-			tablica_oczekujacych[4]++;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 0;
 			repaint_ludzik(hWnd, hdc, ps);
 			break;
-		case ID_BUTTON5:
+
+		case ID_BUTTON_41:
+			aktualny_numer_pietra_ludzik = 4;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 1;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_42:
+			aktualny_numer_pietra_ludzik = 4;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 2;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+
+		case ID_BUTTON_43:
+			aktualny_numer_pietra_ludzik = 4;
+			pozycja = 0;
+			while (tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] >= 0 && pozycja < maksymalna_ilosc_oczekujacych)pozycja++;
+			tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja] = 3;
+			repaint_ludzik(hWnd, hdc, ps);
+			break;
+/*
+		
+		case ID_BUTTON_14:
 			if (pauza == true)
 			{
 				pauza = false;
@@ -880,7 +1102,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				KillTimer(hWnd, TMR_1);
 			}
 			break;
-		case ID_BUTTON6:
+		case ID_BUTTON_12:
 			pauza = true;
 			KillTimer(hWnd, TMR_1);
 			dane.erase(dane.begin() + 2, dane.end()); 
@@ -888,10 +1110,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			plik_dane.close();
 			plik_dane.open("D:\\outputCatapult01.log", std::ios::in);
 			break;
-		case ID_BUTTON7:
+		case ID_BUTTON_23:
 			osie = 0;
 			break;
-		case ID_BUTTON8:
+*/
+
+	/*	case ID_BUTTON8:
 			osie = 1;
 			break;
 		case ID_BUTTON9:
@@ -928,7 +1152,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
 			}
 			break;
-
+*/
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
