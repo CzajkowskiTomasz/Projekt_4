@@ -15,6 +15,7 @@
 #define MAX_LOADSTRING 100
 #define TMR_1 1
 #define TMR_2 2
+#define TMR_3 3
 
 #define M_PI 3.14159265358979323846
 #define liczba_danych_w_probce 12
@@ -23,8 +24,9 @@
 
 #define ilosc_pieter 5
 #define maksymalna_ilosc_oczekujacych 10
-#define maksymalny_udzwig_windy 600 //w kg
-#define srednia_waga_czlowieka 70   //w kg
+#define maksymalny_udzwig_windy 600                       //w kg
+#define srednia_waga_czlowieka 70                         //w kg
+#define czas_po_ktorym_pusta_winda_zjezdza_na_parter 5000 //w ms
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -54,10 +56,12 @@ double blad = 0;
 long double zmiana_przedzia³ki = 0.025;
 
 int tablica_oczekujacych[ilosc_pieter][maksymalna_ilosc_oczekujacych];
-int aktualny_numer_pietra_ludzik= 0;
+int tablica_pasazerow[maksymalny_udzwig_windy/srednia_waga_czlowieka];
+int aktualny_numer_pietra_ludzik = 0;
 int pozycja_w_kolejce = 0;
 int aktualna_pozycja_windy = 750;
 int docelowe_pietro_windy = 0;
+bool w_ruchu = false;
 
 
 
@@ -549,12 +553,12 @@ void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	RECT drawArea;
 
-	drawArea = { pozycja_w_kolejce * 40 + 5, 675 - aktualny_numer_pietra_ludzik * 150, pozycja_w_kolejce * 40 + 35, 745 - aktualny_numer_pietra_ludzik * 150 };
+	drawArea = { (maksymalna_ilosc_oczekujacych - pozycja_w_kolejce) * 40 - 30, 675 - aktualny_numer_pietra_ludzik * 150, (maksymalna_ilosc_oczekujacych - pozycja_w_kolejce) * 40 + 10, 745 - aktualny_numer_pietra_ludzik * 150 };
 				
 	InvalidateRect(hWnd, &drawArea, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
 
-	rysowanie_ludzika(hdc, pozycja_w_kolejce *40 + 5, 685-aktualny_numer_pietra_ludzik*150, tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce]);
+	rysowanie_ludzika(hdc,(maksymalna_ilosc_oczekujacych - pozycja_w_kolejce )*40 - 30, 685-aktualny_numer_pietra_ludzik*150, tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce]);
 
 	EndPaint(hWnd, &ps);
 }
@@ -656,11 +660,12 @@ int otwieranie_pliku(std::fstream &plik_dane)
 
 int OnCreate(HWND window)
 {
-	//std::vector<int> tablica_oczekujacych;
 	for (int i = 0; i < ilosc_pieter; i++)
 	{
 		for (int j = 0; j < maksymalna_ilosc_oczekujacych; j++)tablica_oczekujacych[i][j] = -1;
 	}
+	for (int i = 0; i < maksymalny_udzwig_windy / srednia_waga_czlowieka; i++)tablica_pasazerow[i] = -1;
+
 	return 0;
 }
 
@@ -673,14 +678,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
-	// OTWIERANIE PLIKU:
-	
-	
-	if (!plik_dane)
-	{
-		return 1;
-	}
 
 	// TODO: Place code here.
 	MSG msg;
@@ -780,59 +777,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
 		0, 0, 160 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 815, NULL, NULL, hInstance, NULL);
 	// create button and store the handle                                                       
-	
-	/*
-	//Przyciski wyboru poczatkowego pomiaru
-	
-	hwndButton = CreateWindow(TEXT("button"), TEXT("<<"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 30, 30, 30, hWnd, (HMENU)ID_BUTTON1, GetModuleHandle(NULL), NULL);
-	
-	hwndButton = CreateWindow(TEXT("button"), TEXT("<"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 45, 30, 30, 30, hWnd, (HMENU)ID_BUTTON2, GetModuleHandle(NULL), NULL);
-	
-	hwndButton = CreateWindow(TEXT("button"), TEXT(">"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 80, 30, 30, 30, hWnd, (HMENU)ID_BUTTON3, GetModuleHandle(NULL), NULL);
-	
-	hwndButton = CreateWindow(TEXT("button"), TEXT(">>"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 115, 30, 30, 30, hWnd, (HMENU)ID_BUTTON4, GetModuleHandle(NULL), NULL);
-	
-	//Przycisk START/STOP
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT("START/PAUZA"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 110, 100, 30, hWnd, (HMENU)ID_BUTTON5, GetModuleHandle(NULL), NULL);
-
-	//Przycisk Reset
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT("RESET"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 145, 100, 30, hWnd, (HMENU)ID_BUTTON6, GetModuleHandle(NULL), NULL);
-
-	//Przyciski Osi
-	
-	
-	hwndButton = CreateWindow(TEXT("button"), TEXT("Oœ X"),
-		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, 10, 230, 100, 30, hWnd, (HMENU)ID_BUTTON7, GetModuleHandle(NULL), NULL);
-	hwndButton = CreateWindow(TEXT("button"), TEXT("Oœ Y"),
-		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, 10, 265, 100, 30, hWnd, (HMENU)ID_BUTTON8, GetModuleHandle(NULL), NULL);
-	hwndButton = CreateWindow(TEXT("button"), TEXT("Oœ Z"),
-		WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON, 10, 300, 100, 30, hWnd, (HMENU)ID_BUTTON9, GetModuleHandle(NULL), NULL);
-	hwndButton = CreateWindow(TEXT("button"), TEXT("ZatwierdŸ"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 335, 100, 30, hWnd, (HMENU)ID_BUTTON10, GetModuleHandle(NULL), NULL);
-	
-
-	//Przyciski wyboru przedzia³ki czasowej
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT("<<"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 470, 30, 30, 30, hWnd, (HMENU)ID_BUTTON11, GetModuleHandle(NULL), NULL);
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT("<"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 505, 30, 30, 30, hWnd, (HMENU)ID_BUTTON12, GetModuleHandle(NULL), NULL);
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT(">"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 540, 30, 30, 30, hWnd, (HMENU)ID_BUTTON13, GetModuleHandle(NULL), NULL);
-
-	hwndButton = CreateWindow(TEXT("button"), TEXT(">>"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 575, 30, 30, 30, hWnd, (HMENU)ID_BUTTON14, GetModuleHandle(NULL), NULL);
-	*/
 
 	//Przyciski Piêter
 
@@ -1008,10 +952,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_BUTTON_0:
-			if (aktualna_pozycja_windy < 750)
+			if (aktualna_pozycja_windy != 750)
 			{
 				docelowe_pietro_windy = 0;
-				SetTimer(hWnd, TMR_2, 1, 0);
+				SetTimer(hWnd, TMR_1, 1, 0);
 			}
 			break;
 //1 Pietro
@@ -1061,12 +1005,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_BUTTON_1:
-			if (aktualna_pozycja_windy < 600)
-			{
-				docelowe_pietro_windy = 1;
-				SetTimer(hWnd, TMR_2, 1, 0);
-			}
-			if (aktualna_pozycja_windy > 600)
+			if (aktualna_pozycja_windy != 600)
 			{
 				docelowe_pietro_windy = 1;
 				SetTimer(hWnd, TMR_1, 1, 0);
@@ -1119,12 +1058,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_BUTTON_2:
-			if (aktualna_pozycja_windy < 450)
-			{
-				docelowe_pietro_windy = 2;
-				SetTimer(hWnd, TMR_2, 1, 0);
-			}
-			if (aktualna_pozycja_windy > 450)
+			if (aktualna_pozycja_windy != 450)
 			{
 				docelowe_pietro_windy = 2;
 				SetTimer(hWnd, TMR_1, 1, 0);
@@ -1177,12 +1111,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_BUTTON_3:
-			if (aktualna_pozycja_windy < 300)
-			{
-				docelowe_pietro_windy = 3;
-				SetTimer(hWnd, TMR_2, 1, 0);
-			}
-			if (aktualna_pozycja_windy > 300)
+			if (aktualna_pozycja_windy != 300)
 			{
 				docelowe_pietro_windy = 3;
 				SetTimer(hWnd, TMR_1, 1, 0);
@@ -1235,77 +1164,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case ID_BUTTON_4:
-			if (aktualna_pozycja_windy > 150)
+			if (aktualna_pozycja_windy != 150)
 			{
 				docelowe_pietro_windy = 4;
 				SetTimer(hWnd, TMR_1, 1, 0);
 			}
 			break;
-/*
-		
-		case ID_BUTTON_14:
-			if (pauza == true)
-			{
-				pauza = false;
-				SetTimer(hWnd, TMR_1, 1, 0);
-			}
-			else
-			{
-				pauza = true;
-				KillTimer(hWnd, TMR_1);
-			}
-			break;
-		case ID_BUTTON_12:
-			pauza = true;
-			KillTimer(hWnd, TMR_1);
-			dane.erase(dane.begin() + 2, dane.end()); 
-			value = 0;
-			plik_dane.close();
-			plik_dane.open("D:\\outputCatapult01.log", std::ios::in);
-			break;
-		case ID_BUTTON_23:
-			osie = 0;
-			break;
-*/
 
-	/*	case ID_BUTTON8:
-			osie = 1;
-			break;
-		case ID_BUTTON9:
-			osie = 2;
-			break;
-		case ID_BUTTON10:
-			otwieranie_pliku(plik_dane);
-			break;
-		case ID_BUTTON11:
-			if(zmiana_przedzia³ki >= 0.15000)
-			{
-				zmiana_przedzia³ki = zmiana_przedzia³ki - 0.125;
-				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
-			}
-			break;
-		case ID_BUTTON12:
-			if(zmiana_przedzia³ki >= 0.05000)
-			{
-				zmiana_przedzia³ki = zmiana_przedzia³ki - 0.025;
-				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
-			}
-			break;
-		case ID_BUTTON13:
-			if ((liczba_pomiarow - liczba_zbednych_pomiarow) / (value + (zmiana_przedzia³ki + 0.025) / 0.025) > 1)
-			{
-				zmiana_przedzia³ki = zmiana_przedzia³ki + 0.025;
-				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
-			}
-			break;
-		case ID_BUTTON14:
-			if ((liczba_pomiarow - liczba_zbednych_pomiarow) / (value + (zmiana_przedzia³ki + 0.125) / 0.025) > 1)
-			{
-				zmiana_przedzia³ki = zmiana_przedzia³ki + 0.125;
-				//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
-			}
-			break;
-*/
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -1314,6 +1179,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here (not depend on timer, buttons)
 		repaintWindow(hWnd, hdc, ps, NULL);
+		
 		//repaintData(hWnd, hdc, ps);
 		//repaintDane_niezalezne_od_czasu(hWnd, hdc, ps);
 		//repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
@@ -1330,24 +1196,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case TMR_1:
 			//force window to repaint
-			
+			w_ruchu = true;
+
 			if (aktualna_pozycja_windy > (ilosc_pieter - docelowe_pietro_windy)*150)
 			{
 				aktualna_pozycja_windy--;
 				repaint_winda(hWnd, hdc, ps);
 			}
-			else KillTimer(hWnd, TMR_1);
-			break;
-
-		case TMR_2:
-			//force window to repaint
-
-			if (aktualna_pozycja_windy < (ilosc_pieter - docelowe_pietro_windy) * 150)
+			else if (aktualna_pozycja_windy < (ilosc_pieter - docelowe_pietro_windy) * 150)
 			{
 				aktualna_pozycja_windy++;
 				repaint_winda(hWnd, hdc, ps);
 			}
-			else KillTimer(hWnd, TMR_2);
+			else
+			{
+				w_ruchu = false;
+				SetTimer(hWnd, TMR_2, czas_po_ktorym_pusta_winda_zjezdza_na_parter, 0);
+				KillTimer(hWnd, TMR_1);
+			}
+			break;
+
+		case TMR_2:
+			//force window to repaint
+			int wartosc = 0;
+			
+			while (tablica_pasazerow[wartosc] >= 0 && wartosc < maksymalny_udzwig_windy/srednia_waga_czlowieka)wartosc++;
+			
+			if (wartosc == 0 && w_ruchu == false && aktualna_pozycja_windy!=750)
+			{
+				docelowe_pietro_windy = 0;
+				SetTimer(hWnd, TMR_1, 1, 0);
+			}
+			KillTimer(hWnd, TMR_2);
 			break;
 		}
 
