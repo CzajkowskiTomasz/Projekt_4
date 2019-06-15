@@ -587,7 +587,7 @@ void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int ilosc_wsiadaja
 {
 	RECT drawArea;
 
-	drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + pozycja_x, aktualna_pozycja_windy - 5};
+	drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + pozycja_x, aktualna_pozycja_windy - 4};
 
 	InvalidateRect(hWnd, &drawArea, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
@@ -597,6 +597,50 @@ void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int ilosc_wsiadaja
 	Sleep(100);
 
 	EndPaint(hWnd, &ps);
+}
+
+void wysiadanie_pasazerow()
+{
+	for (int i = 0; i < tablica_pasazerow.size(); i++)
+	{
+		if (tablica_pasazerow[i] == docelowe_pietra_windy[0])
+		{
+			tablica_pasazerow.erase(tablica_pasazerow.begin() + i);
+			i--;
+		}
+	}
+}
+
+int sortowanie_wysiadaj¹cych()
+{
+	int rozmiar = 0;
+	for (int i = 0; i < tablica_pasazerow.size(); i++)
+	{
+		if (tablica_pasazerow[i] == docelowe_pietra_windy[0])
+		{
+			int j = 0;
+			rozmiar++;
+			while (tablica_pasazerow[j] == docelowe_pietra_windy[0] && j < i)j++;
+			
+			int swap_tab = tablica_pasazerow[j];
+			tablica_pasazerow[j] = tablica_pasazerow[i];
+			tablica_pasazerow[i] = swap_tab;
+		}
+	}
+	//if(tablica_pasazerow.size()>1)rozmiar--;
+
+	return rozmiar;
+}
+
+bool sprawdzanie_czy_ktos_wysiada()
+{
+	bool wysiada = false;
+	for (int i = 0; i < tablica_pasazerow.size() && wysiada == false; i++)
+	{
+		if (tablica_pasazerow[i] == docelowe_pietra_windy[0])wysiada = true;
+	}
+
+	return wysiada;
 }
 
 void repaint_winda(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
@@ -609,7 +653,7 @@ void repaint_winda(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 
 	rysowanie_windy(hdc);
 
-	for (int i = 0; i < tablica_pasazerow.size(); i++)rysowanie_ludzika(hdc, maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 - 20 - i*40, aktualna_pozycja_windy - 65, tablica_pasazerow[i]);
+	for (int i = 0; i < tablica_pasazerow.size(); i++)rysowanie_ludzika(hdc, maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 - 20 - i * 40, aktualna_pozycja_windy - 65, tablica_pasazerow[i]);
 	Sleep(50);
 	EndPaint(hWnd, &ps);
 }
@@ -624,18 +668,18 @@ void repaint_otwieranie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int po
 
 		InvalidateRect(hWnd, &drawArea, TRUE);
 		hdc = BeginPaint(hWnd, &ps);
-		
+
 		otwieranie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
 		Sleep(5);
 
 		EndPaint(hWnd, &ps);
-	}	
+	}
 }
 
 void repaint_zamykanie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int pozycja_x)
 {
 	RECT drawArea;
-	
+
 	for (int i = 144; i > 0; i--)
 	{
 		drawArea = { pozycja_x, aktualna_pozycja_windy - i, pozycja_x + 6, aktualna_pozycja_windy - i + 1 };
@@ -645,10 +689,47 @@ void repaint_zamykanie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int poz
 
 		zamykanie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
 		Sleep(5);
-		
+
 		EndPaint(hWnd, &ps);
 	}
 }
+
+void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+{	
+	if (sprawdzanie_czy_ktos_wysiada() == true)
+	{
+		int ilosc_wysiadajacych = sortowanie_wysiadaj¹cych();
+		repaint_winda(hWnd, hdc, ps);
+		repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych*40 + 25);
+		
+		
+		RECT drawArea;
+
+		for (int i = 0; i < 150 + ilosc_wysiadajacych*40; i = i + 5)
+		{
+			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
+
+			InvalidateRect(hWnd, &drawArea, TRUE);
+			hdc = BeginPaint(hWnd, &ps);
+
+			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j)* 40 + maksymalna_ilosc_oczekujacych * 40 - 20 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
+
+			Sleep(100);
+		}
+
+		wysiadanie_pasazerow();
+
+		repaint_winda(hWnd, hdc, ps);
+
+		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 25);
+
+		EndPaint(hWnd, &ps);
+	}
+	
+	
+}
+
+
 
 int sprawdzanie_ilosci_oczekujacych_na_pietrze(int pietro)
 {
@@ -692,6 +773,8 @@ void wsiadanie_pasazerow()
 	}
 }
 
+
+
 /*
 void repaintData(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
@@ -730,49 +813,6 @@ void repaintDane_niezalezne_od_czasu(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 	EndPaint(hWnd, &ps);
 }
 */
-int otwieranie_pliku(std::fstream &plik_dane)
-{
-	if (!plik_dane)
-	{
-		//std::cout << "Plik wejsciowy klienci.txt nie zostal otwarty. :(" << std::endl;
-		return 1;
-	}
-	else
-	{
-		double dana;
-		int j = 0;
-
-		plik_dane.seekg(0);
-		
-		while(plik_dane.eof() == false && j <= liczba_zbednych_pomiarow )
-		{
-			if(j == 0)plik_dane >> dana;
-			else for (int i = 0; i < liczba_danych_w_probce ; i++)plik_dane >> dana;
-			j++;
-		}
-
-		if (osie == 2)
-		{
-			plik_dane >> dana;
-			plik_dane >> dana;
-		}
-		else if(osie == 1)
-		{
-			plik_dane >> dana;
-		}
-		
-		dane.push_back(dana);
-
-		while (plik_dane.eof() == false)
-		{
-			for (int i = 0; i < liczba_danych_w_probce ; i++)plik_dane >> dana;
-			dane.push_back(dana);
-		}
-		dane.erase(dane.end() - 1);
-
-		return 0;
-	}
-}
 
 int OnCreate(HWND window)
 {
@@ -1311,38 +1351,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			else
 			{
 				
-				repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
+				if(tablica_pasazerow.size()>0)repaint_wysiadajacy(hWnd, hdc, ps);
 				
+				if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) > 0)
+				{
+					repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
 
-				//wsiadanie
-				if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size())
-				{
-					for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
+
+					//wsiadanie
+					if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size())
 					{
-						repaint_wsiadajacy(hWnd, hdc, ps, sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]), i);
-					};
-				}
-				else
-				{
-					for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
+						for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
+						{
+							repaint_wsiadajacy(hWnd, hdc, ps, sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]), i);
+						};
+					}
+					else
 					{
-						repaint_wsiadajacy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size(), i);
-					};
+						for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
+						{
+							repaint_wsiadajacy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size(), i);
+						};
+					}
+
+					repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
+
+					wsiadanie_pasazerow();
 				}
 				
-				repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
-
-				wsiadanie_pasazerow();
 				docelowe_pietra_windy.erase(docelowe_pietra_windy.begin());
-				dodawanie_docelowych_pietr_windy();
 
-				if (docelowe_pietra_windy.size() == 0)
+				if (docelowe_pietra_windy.size() == 0 && tablica_pasazerow.size()==0)
 				{
 					w_ruchu = false;
+					powrot = true;
 					SetTimer(hWnd, TMR_2, czas_po_ktorym_pusta_winda_zjezdza_na_parter, 0);
 					KillTimer(hWnd, TMR_1);
 				}
-				
+				dodawanie_docelowych_pietr_windy();
 			}
 			break;
 
@@ -1351,7 +1397,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (tablica_pasazerow.size() == 0 &&  w_ruchu == false && aktualna_pozycja_windy!=750)
 			{
 				docelowe_pietra_windy.push_back(0);
-				powrot = true;
 				SetTimer(hWnd, TMR_1, 1, 0);
 				
 			}
