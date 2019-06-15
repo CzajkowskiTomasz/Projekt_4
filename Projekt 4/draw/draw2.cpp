@@ -25,7 +25,7 @@
 #define maksymalna_ilosc_oczekujacych 10
 #define maksymalny_udzwig_windy 600                       //w kg
 #define srednia_waga_czlowieka 70                         //w kg
-#define czas_po_ktorym_pusta_winda_zjezdza_na_parter 5000 //w ms
+#define czas_po_ktorym_pusta_winda_zjezdza_na_parter 5    //w s
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -37,22 +37,7 @@ INT value;
 // buttons
 HWND hwndButton;
 
-// sent data
-RECT drawArea1 = { 150, 0, 450, 400 };
-RECT drawArea2 = { 220, 120, 380, 280};
-RECT drawArea3 = { 460,70,735,165 };
-RECT drawArea_liczba_zbednych_pomiarow = { 5, 5, 270, 30 };
-RECT drawArea_zegar = { 5,80,65,105 };
-RECT drawArea_os = { 5,200,110,230 };
-RECT drawArea_przedzialka_czasowa = { 460,5,740,30 };
-
 //Zmienne globalne
-bool pauza = true;
-int liczba_zbednych_pomiarow = 0;
-int osie = 0;
-double blad = 0;
-long double zmiana_przedzia³ki = 0.025;
-
 int tablica_oczekujacych[ilosc_pieter][maksymalna_ilosc_oczekujacych];
 std::vector<int> tablica_pasazerow;
 int aktualny_numer_pietra_ludzik = 0;
@@ -60,13 +45,7 @@ int pozycja_w_kolejce = 0;
 int aktualna_pozycja_windy = 750;
 int docelowe_pietro_windy;
 bool powrot = false;
-
-
-
-
-// Dane z pliku
-std::vector<double> dane;
-using namespace std;
+int czas_do_powrotu_windy = czas_po_ktorym_pusta_winda_zjezdza_na_parter;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -74,104 +53,6 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	Buttons(HWND, UINT, WPARAM, LPARAM);
-/*
-void Rysowanie_danych(HDC hdc, double angle)
-{
-	Graphics graphics(hdc);
-	
-	Gdiplus::Font *czcionka = new Font(L"Times new roman", 16);
-	PointF A = PointF(460, 120);
-	PointF B = PointF(460, 145);
-	PointF C = PointF(460, 70);
-	PointF D = PointF(460, 95);
-
-	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
-
-	graphics.DrawString(L"Aktualny k¹t (po kalibracji):", 29, czcionka, A, &cyfry);
-
-	std::wstring kat;
-
-	graphics.DrawString(L"Aktualny k¹t (przed kalibracj¹):", 32, czcionka, C, &cyfry);
-
-	kat = std::to_wstring(angle);
-
-	graphics.DrawString(kat.c_str(), kat.length(), czcionka, D, &cyfry);
-
-	if (value > 1)
-	{
-		angle = angle + blad;
-		if (angle > 180)angle = angle - 360;
-		if (angle < -180)angle = angle + 360;
-	}
-	kat = std::to_wstring(angle);
-
-	graphics.DrawString(kat.c_str(), kat.length(), czcionka, B, &cyfry);
-}
-
-void Rysowanie_zbednych_pomiarow(HDC hdc)
-{
-	Graphics graphics(hdc);
-
-	Gdiplus::Font *czcionka = new Font(L"Times new roman", 16);
-	PointF A = PointF(5, 5);
-	PointF B = PointF(220, 5);
-	PointF C = PointF(5, 200);
-	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
-
-	graphics.DrawString(L"Liczba zbêdnych próbek:", 23, czcionka, A, &cyfry);
-
-	std::wstring liczba_string;
-
-	liczba_string = std::to_wstring(liczba_zbednych_pomiarow);
-
-	graphics.DrawString(liczba_string.c_str(), liczba_string.length(), czcionka, B, &cyfry);
-}
-
-void Rysowanie_zegar(HDC hdc)
-{
-	Graphics graphics(hdc);
-
-	Gdiplus::Font *czcionka = new Font(L"Times new roman", 16);
-	
-	PointF A = PointF(5, 80);
-	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
-
-	graphics.DrawString(L"Zegar:", 6, czcionka, A, &cyfry);
-}
-
-void Rysowanie_osi(HDC hdc)
-{
-	Graphics graphics(hdc);
-
-	Gdiplus::Font *czcionka = new Font(L"Times new roman", 16);
-
-	PointF A = PointF(5, 200);
-	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
-
-	graphics.DrawString(L"Wybór osi:", 11, czcionka, A, &cyfry);
-}
-
-void Rysowanie_przedzialki_czasowej(HDC hdc)
-{
-	Graphics graphics(hdc);
-
-	Gdiplus::Font *czcionka = new Font(L"Times new roman", 16);
-
-	PointF A = PointF(460, 5);
-	PointF B = PointF(725, 5);
-	PointF C = PointF(640, 5);
-	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
-
-	graphics.DrawString(L"Przedzia³ka czasowa:", 22, czcionka, A, &cyfry);
-	graphics.DrawString(L"s", 1, czcionka, B, &cyfry);
-
-	std::wstring liczba_string;
-
-	liczba_string = std::to_wstring(zmiana_przedzia³ki);
-
-	graphics.DrawString(liczba_string.c_str(), liczba_string.length(), czcionka, C, &cyfry);
-}
-*/
 
 void rysowanie_ludzika(HDC hdc, int jakis_x, int jakis_y, int numer_ludzika)
 {
@@ -240,21 +121,37 @@ void rysowanie_pieter(HDC hdc)
 
 	PointF A;
 	
-	for (int i = 0; i < 5; i++)
+	for (int i = 1; i < 5; i++)
 	{
 		A = PointF(5, 15 + 150 * i);
 		graphics.DrawString(L"Wybór piêtra:", 13, czcionka, A, &litery);
 	}
-		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 15);
-		graphics.DrawString(L"4 Piêtro", 8, czcionka, A, &litery);
-		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 165);
-		graphics.DrawString(L"3 Piêtro", 8, czcionka, A, &litery);
-		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 315);
-		graphics.DrawString(L"2 Piêtro", 8, czcionka, A, &litery);
-		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 465);
-		graphics.DrawString(L"1 Piêtro", 8, czcionka, A, &litery);
-		A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 615);
-		graphics.DrawString(L"Parter", 6, czcionka, A, &litery);
+
+	A = PointF(5, 40);
+	graphics.DrawString(L"Wybór piêtra:", 13, czcionka, A, &litery);
+
+	A = PointF(5, 2);
+	graphics.DrawString(L"Czas pozosta³y do zjazdu na parter:", 35, czcionka, A, &litery);
+
+	A = PointF(256, 2);
+	graphics.DrawString(L"s", 1, czcionka, A, &litery);
+
+	A = PointF(5, 18);
+	graphics.DrawString(L"Aktualna waga pasa¿erów:", 24, czcionka, A, &litery);
+
+	A = PointF(215, 18);
+	graphics.DrawString(L"kg", 2, czcionka, A, &litery);
+
+	A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 15);
+	graphics.DrawString(L"4 Piêtro", 8, czcionka, A, &litery);
+	A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 165);
+	graphics.DrawString(L"3 Piêtro", 8, czcionka, A, &litery);
+	A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 315);
+	graphics.DrawString(L"2 Piêtro", 8, czcionka, A, &litery);
+	A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 465);
+	graphics.DrawString(L"1 Piêtro", 8, czcionka, A, &litery);
+	A = PointF(35 + maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40, 615);
+	graphics.DrawString(L"Parter", 6, czcionka, A, &litery);
 
 //Podloga oczekujacych
 	for (int i = 0; i <= 600; i = i + 150)
@@ -306,264 +203,6 @@ void zamykanie_drzwi_windy(HDC hdc, int pozycja_x, int pozycja_y)
 
 	graphics.DrawLine(&drzwi, pozycja_x, pozycja_y, pozycja_x + 5, pozycja_y);
 };
-/*
-void rysowanie_kompasu(HDC hdc, double angle_1)
-{
-	angle_1 = angle_1 + blad;
-
-	if (angle_1 > 180)angle_1 = angle_1 - 360;
-	if (angle_1 < -180)angle_1 = angle_1 + 360;
-
-	double angle = angle_1;
-	
-	Graphics kompas(hdc);
-	SwapBuffers(hdc);
-
-	Pen ramka(Color(255, 150, 150, 150));
-	Pen tarcza(Color(255, 200, 200, 200));
-	Pen srodek(Color(255, 0, 0, 0));
-	Pen litery(Color(255, 50, 50, 50));
-	Pen wskazowka_1(Color(255, 255, 20, 20));
-	Pen wskazowka_2(Color(255, 255, 255, 255));
-
-	//Rysowanie uchwytu
-	for (int i = 30; i < 60; i++)kompas.DrawEllipse(&ramka, 300 - (i / 2), 35 - (i / 2), i, i);
-
-	//Rysowanie tarczy i ramki
-	for (int i = 270; i < 300; i++)kompas.DrawEllipse(&ramka, 300 - (i / 2), 200 - (i / 2), i, i);
-	//for (int i = 10; i < 270; i++)kompas.DrawEllipse(&tarcza, 300 - (i / 2), 200 - (i / 2), i, i);
-
-	//Rysowanie liter na tarczy
-	
-	//N
-	for (int i = 0; i < 7; i++)
-	{
-		kompas.DrawLine(&litery, 290 + i, 110, 290 + i, 80);
-		kompas.DrawLine(&litery, 290 + i, 80, 303 + i, 110);
-		kompas.DrawLine(&litery, 310 - i, 110, 310 - i, 80);
-	}
-
-	//S
-	for (int i = 0; i < 12; i++)
-	{
-		kompas.DrawArc(&litery, 294 - (i / 2), 294 - (i / 2), 9 + i, 9 + i, 90, 270);
-		kompas.DrawArc(&litery, 294-(i/2), 310-(i/2), 12 + i, 12 + i, 270, 270);
-	}
-
-	//W
-	for (int i = 0; i < 7; i++)
-	{
-		kompas.DrawLine(&litery, 180 + i, 182, 185 + i, 218);
-		kompas.DrawLine(&litery, 185 + i, 218, 195 + i, 200);
-		kompas.DrawLine(&litery, 195 + i, 200, 205 + i, 218);
-		kompas.DrawLine(&litery, 205 + i, 218, 210 + i, 182);
-	}
-
-	//E
-	for (int i = -3; i < 3; i++)
-	{
-		kompas.DrawLine(&litery, 400 + i, 182, 400 + i, 217);
-		kompas.DrawLine(&litery, 400, 185 + i, 418, 185 + i);
-		kompas.DrawLine(&litery, 400, 200 + i, 418, 200 + i);
-		kompas.DrawLine(&litery, 400, 215 + i, 418, 215 + i);
-	}
-
-	//Wyliczanie polozenia wskazowek
-
-	int jakis_x = 0;
-	int jakis_y = 0;
-	
-	if (0 < angle && angle < 90)
-	{
-		if (angle <= 80)
-		{
-			jakis_x = promien_kola_wskazowek / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-			jakis_y = jakis_x * tan((angle / 180)*(M_PI));
-
-			jakis_y = -jakis_y;
-		}
-		else
-		{
-			jakis_x = 13 - (angle - 80) * (13 / 10);
-			jakis_y = -73 - (angle - 80) * (7 / 10);
-		}
-	}
-	
-	if (90 < angle && angle < 180)
-	{
-		if (angle >= 100)
-		{
-			angle = -angle + 180;
-
-			jakis_x = promien_kola_wskazowek / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-			jakis_y = jakis_x * tan((angle / 180)*(M_PI));
-
-			jakis_x = -jakis_x;
-			jakis_y = -jakis_y;
-		}
-		else
-		{
-			jakis_x = -13 - (angle - 100) * (13 / 10);
-			jakis_y = -73 + (angle - 100) * (7 / 10);
-		}
-		
-		
-	}
-
-	if (-90 < angle && angle < 0)
-	{
-		if (angle >= -80)
-		{
-			angle = -angle;
-
-			jakis_x = promien_kola_wskazowek / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-			jakis_y = jakis_x * tan((angle / 180)*(M_PI));
-		}
-		else
-		{
-			jakis_x = 13 + (angle + 80) * ( 13 / 10) ;
-			jakis_y = 73 - (angle + 80) * (7 / 10) ;
-		}
-	}
-
-	if (-180 < angle && angle < -90)
-	{
-		if (angle <= -100)
-		{
-			angle = angle + 180;
-
-			jakis_x = promien_kola_wskazowek / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-			jakis_y = jakis_x * tan((angle / 180)*(M_PI));
-
-			jakis_x = -jakis_x;
-		}
-		else 
-		{
-			jakis_x = -13 + (angle + 100) * (13 / 10);
-			jakis_y = 73 + (angle + 100) * (7 / 10);
-		}
-	}
-
-	angle = angle_1;
-
-	if (angle == 180 || angle == -180)
-	{
-		jakis_x = -promien_kola_wskazowek;
-		jakis_y = 0;
-	}
-
-	if (angle == 0)
-	{
-		jakis_x = promien_kola_wskazowek;
-		jakis_y = 0;
-	}
-
-
-	if(angle == 90)
-	{
-		jakis_x = 0;
-		jakis_y = -promien_kola_wskazowek;
-	}
-
-	if (angle == -90)
-	{
-		jakis_x = 0;
-		jakis_y = promien_kola_wskazowek;
-	}
-	
-	jakis_x = jakis_x + 300;
-	jakis_y = jakis_y + 200;
-
-	//Rysowanie wskazowki
-
-	double x_2 = 0;
-	double y_2 = 0;
-
-	angle = angle_1 + 90;
-
-		for (int i = -15; i < 15; i++)
-		{
-			if (0 < angle && angle < 90)
-			{
-				x_2 = i / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-				y_2 = x_2 * tan((angle / 180)*(M_PI));
-
-				y_2 = -y_2;
-			}
-
-			if (90 < angle && angle < 180)
-			{
-				x_2 = i / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-				y_2 = x_2 * tan((angle / 180)*(M_PI));
-
-				x_2 = -x_2;
-			}
-
-			if (180 < angle && angle < 270)
-			{
-				x_2 = i / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-				y_2 = x_2 * tan((angle / 180)*(M_PI));
-
-				x_2 = -x_2;
-			}
-
-			if (-90 < angle && angle < 0)
-			{
-				x_2 = i / (sqrt(1 + tan((angle / 180)*(M_PI))*tan((angle / 180)*(M_PI))));
-				y_2 = x_2 * tan((angle / 180)*(M_PI));
-
-				y_2 = -y_2;
-			}
-
-			if (angle == 180 || angle == -180)
-			{
-				x_2 = -i;
-				y_2 = 0;
-			}
-
-			if (angle == 0)
-			{
-				x_2 = i;
-				y_2 = 0;
-			}
-
-
-			if (angle == 90)
-			{
-				x_2 = 0;
-				y_2 = i;
-			}
-
-			if (angle == -90 && angle == 270)
-			{
-				x_2 = 0;
-				y_2 = -1 * i;
-			}
-
-			x_2 = x_2 + 300;
-			y_2 = y_2 + 200;
-
-			kompas.DrawLine(&wskazowka_1, jakis_x, jakis_y, x_2, y_2);
-			kompas.DrawLine(&tarcza, 300 + (300 - jakis_x), 200 + (200 - jakis_y), x_2, y_2);
-		}
-	
-	//Rysowanie srodka
-	for (int i = 0; i < 10; i++)kompas.DrawEllipse(&srodek, 300 - (i / 2), 200 - (i / 2), i, i);
-}
-*/
-void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, RECT *drawArea)
-{
-	if (drawArea==NULL)
-		InvalidateRect(hWnd, NULL, TRUE); // repaint all
-	else
-		InvalidateRect(hWnd, NULL, TRUE); //repaint drawArea
-	hdc = BeginPaint(hWnd, &ps);
-
-	rysowanie_pieter(hdc);
-	rysowanie_windy(hdc);
-	
-	EndPaint(hWnd, &ps);
-}
 
 void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
@@ -578,24 +217,6 @@ void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 
 	EndPaint(hWnd, &ps);
 }
-
-/*
-void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int ilosc_wsiadajacych, int pozycja_x)
-{
-	RECT drawArea;
-
-	drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + pozycja_x, aktualna_pozycja_windy - 4 };
-
-	InvalidateRect(hWnd, &drawArea, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-
-	for (int i = 0; i < ilosc_wsiadajacych; i++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - i) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy / 150)][i]);
-
-	Sleep(100);
-
-	EndPaint(hWnd, &ps);
-}
-*/
 
 void wysiadanie_pasazerow()
 {
@@ -640,6 +261,49 @@ bool sprawdzanie_czy_ktos_wysiada()
 	return wysiada;
 }
 
+void rysowanie_wagi_pasazerow(HDC hdc, int waga_pasazerow)
+{
+	Graphics graphics(hdc);
+
+	Gdiplus::Font *czcionka = new Font(L"Times new roman", 13);
+	PointF A = PointF(185, 18);
+
+	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
+
+	std::wstring string_waga_pasazerow;
+	
+	string_waga_pasazerow = std::to_wstring(waga_pasazerow);
+
+	graphics.DrawString(string_waga_pasazerow.c_str(), string_waga_pasazerow.length(), czcionka, A, &cyfry);
+}
+
+void rysowanie_czasu_do_powrotu_windy(HDC hdc, int czas_do_powrotu_windy)
+{
+	Graphics graphics(hdc);
+
+	Gdiplus::Font *czcionka = new Font(L"Times new roman", 13);
+	PointF A = PointF(245, 2);
+
+	Gdiplus::SolidBrush cyfry(Gdiplus::Color(255, 0, 0, 0));
+
+	std::wstring string_czas_do_powrotu_windy;
+
+	string_czas_do_powrotu_windy = std::to_wstring(czas_do_powrotu_windy);
+
+	graphics.DrawString(string_czas_do_powrotu_windy.c_str(), string_czas_do_powrotu_windy.length(), czcionka, A, &cyfry);
+}
+
+void repaint_rysowanie_czasu_do_powrotu_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int czas_do_powrotu_windy)
+{
+	RECT drawArea;
+	drawArea = { 240, 0, 260, 20 };
+
+	InvalidateRect(hWnd, &drawArea, TRUE);
+	hdc = BeginPaint(hWnd, &ps);
+	rysowanie_czasu_do_powrotu_windy(hdc, czas_do_powrotu_windy);
+	EndPaint(hWnd, &ps);
+}
+
 void repaint_winda(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	RECT drawArea;
@@ -651,8 +315,22 @@ void repaint_winda(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 	rysowanie_windy(hdc);
 
 	for (int i = 0; i < tablica_pasazerow.size(); i++)rysowanie_ludzika(hdc, maksymalna_ilosc_oczekujacych * 40 + (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 - 20 - i * 40, aktualna_pozycja_windy - 65, tablica_pasazerow[i]);
-	Sleep(50);
+	
 	EndPaint(hWnd, &ps);
+
+	drawArea = { 180, 20, 215, 35 };
+	InvalidateRect(hWnd, &drawArea, TRUE);
+	hdc = BeginPaint(hWnd, &ps);
+	if (tablica_pasazerow.size() == 0)
+	{
+		rysowanie_wagi_pasazerow(hdc, 0);
+	}
+	else 
+	{
+		rysowanie_wagi_pasazerow(hdc, tablica_pasazerow.size()*srednia_waga_czlowieka);
+	}
+	EndPaint(hWnd, &ps);
+	Sleep(50);
 }
 
 void repaint_otwieranie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int pozycja_x)
@@ -700,14 +378,14 @@ int sprawdzanie_ilosci_oczekujacych_na_pietrze(int pietro)
 }
 
 void dodawanie_docelowych_pietr_windy(HWND hWnd)
-{
+{	
 	int aktualne_pietro_windy = ilosc_pieter - aktualna_pozycja_windy / 150;
 
 	int preferencja = 0;			//"+" -> góra; "-" -> dó³;
 	
 	docelowe_pietro_windy = aktualne_pietro_windy;
 
-	for (int i = 1; i < 4 && docelowe_pietro_windy == aktualne_pietro_windy; i++)
+	for (int i = 1; i <= 4 && docelowe_pietro_windy == aktualne_pietro_windy; i++)
 	{
 		for (int j = 0; j < tablica_pasazerow.size() && docelowe_pietro_windy == aktualne_pietro_windy; j++)
 		{
@@ -736,7 +414,7 @@ void dodawanie_docelowych_pietr_windy(HWND hWnd)
 	
 	if (aktualna_pozycja_windy != 750 && docelowe_pietro_windy == aktualne_pietro_windy)
 	{
-		SetTimer(hWnd, TMR_2, czas_po_ktorym_pusta_winda_zjezdza_na_parter, 0);
+		SetTimer(hWnd, TMR_2, 1000, 0);
 		KillTimer(hWnd, TMR_1);
 	}
 }
@@ -744,22 +422,24 @@ void dodawanie_docelowych_pietr_windy(HWND hWnd)
 void wsiadanie_pasazerow()
 {
 	int rozmiar_tablicy_przed = tablica_pasazerow.size();
+	int ilosc_oczekujacych = sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietro_windy);
+	int ilosc_wolnych_miejsc = (maksymalny_udzwig_windy / srednia_waga_czlowieka) - rozmiar_tablicy_przed;
 
-	if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietro_windy) < (maksymalny_udzwig_windy / srednia_waga_czlowieka)- rozmiar_tablicy_przed)
+	if (ilosc_oczekujacych <= ilosc_wolnych_miejsc)
 	{
-		for (int i = 0; i < sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietro_windy); i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietro_windy][i]);
+		for (int i = 0; i < ilosc_oczekujacych; i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietro_windy][i]);
 	}
 	else
 	{
-		for (int i = 0; i < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - rozmiar_tablicy_przed; i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietro_windy][i]);
+		for (int i = 0; i < ilosc_wolnych_miejsc; i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietro_windy][i]);
 	}
 	
-	for (int i = 0; i < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size() + rozmiar_tablicy_przed; i++)
+	for (int i = 0; i < ilosc_oczekujacych - ilosc_wolnych_miejsc; i++)
 	{
-		tablica_oczekujacych[docelowe_pietro_windy][i] = tablica_oczekujacych[docelowe_pietro_windy][i + tablica_pasazerow.size() - rozmiar_tablicy_przed];
+		tablica_oczekujacych[docelowe_pietro_windy][i] = tablica_oczekujacych[docelowe_pietro_windy][i + ilosc_wolnych_miejsc];
 	}
 
-	for (int i = (maksymalny_udzwig_windy / srednia_waga_czlowieka) - 1; i >= (maksymalny_udzwig_windy / srednia_waga_czlowieka) - (tablica_pasazerow.size() - rozmiar_tablicy_przed); i--)
+	for (int i = ilosc_oczekujacych - ilosc_wolnych_miejsc; i < ilosc_oczekujacych; i++)
 	{
 		tablica_oczekujacych[docelowe_pietro_windy][i] = -1;
 	}
@@ -838,12 +518,12 @@ void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 
 		for (int i = 0; i < 150 + ilosc_wysiadajacych * 40; i = i + 5)
 		{
-			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
+			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 16 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
 
 			InvalidateRect(hWnd, &drawArea, TRUE);
 			hdc = BeginPaint(hWnd, &ps);
 
-			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j) * 40 + maksymalna_ilosc_oczekujacych * 40 - 20 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
+			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j) * 40 + maksymalna_ilosc_oczekujacych * 40 - 19 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
 
 			Sleep(100);
 		}
@@ -856,8 +536,23 @@ void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 
 		EndPaint(hWnd, &ps);
 	}
+}
 
+void repaintWindow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+{
+	InvalidateRect(hWnd, NULL, TRUE); //repaint drawArea
+	hdc = BeginPaint(hWnd, &ps);
 
+	rysowanie_pieter(hdc);
+	rysowanie_windy(hdc);
+	EndPaint(hWnd, &ps);
+
+	RECT drawArea = { 180, 20, 215, 35 };
+	InvalidateRect(hWnd, &drawArea, TRUE);
+	hdc = BeginPaint(hWnd, &ps);
+	rysowanie_wagi_pasazerow(hdc, 0);
+	EndPaint(hWnd, &ps);
+	repaint_rysowanie_czasu_do_powrotu_windy(hWnd, hdc, ps, czas_do_powrotu_windy);
 }
 
 int OnCreate(HWND window)
@@ -868,7 +563,6 @@ int OnCreate(HWND window)
 	}
 	return 0;
 }
-
 
 // main function (exe hInstance)
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -894,8 +588,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, IDC_DRAW, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-
-
 	// Perform application initialization:
 	if (!InitInstance(hInstance, nCmdShow))
 	{
@@ -918,8 +610,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	return (int)msg.wParam;
 }
-
-
 
 //
 //  FUNCTION: MyRegisterClass()
@@ -1034,16 +724,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	
 	//4 Pietro
 	hwndButton = CreateWindow(TEXT("button"), TEXT("0"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_40, GetModuleHandle(NULL), NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 100, 40, 20, 20, hWnd, (HMENU)ID_BUTTON_40, GetModuleHandle(NULL), NULL);
 
 	hwndButton = CreateWindow(TEXT("button"), TEXT("1"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_41, GetModuleHandle(NULL), NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 125, 40, 20, 20, hWnd, (HMENU)ID_BUTTON_41, GetModuleHandle(NULL), NULL);
 
 	hwndButton = CreateWindow(TEXT("button"), TEXT("2"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_42, GetModuleHandle(NULL), NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 40, 20, 20, hWnd, (HMENU)ID_BUTTON_42, GetModuleHandle(NULL), NULL);
 
 	hwndButton = CreateWindow(TEXT("button"), TEXT("3"),
-		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 15, 20, 20, hWnd, (HMENU)ID_BUTTON_43, GetModuleHandle(NULL), NULL);
+		WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 175, 40, 20, 20, hWnd, (HMENU)ID_BUTTON_43, GetModuleHandle(NULL), NULL);
 
 	OnCreate(hWnd);
 
@@ -1343,12 +1033,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		// TODO: Add any drawing code here (not depend on timer, buttons)
-		repaintWindow(hWnd, hdc, ps, NULL);
-		
-		//repaintData(hWnd, hdc, ps);
-		//repaintDane_niezalezne_od_czasu(hWnd, hdc, ps);
-		//repaintLiczba_zbednych_pomiarow(hWnd, hdc, ps);
-		//repaintPrzedzialka_czasowa(hWnd, hdc, ps);
+		repaintWindow(hWnd, hdc, ps);
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -1362,6 +1047,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case TMR_1:
 			//force window to repaint
 			
+			if (docelowe_pietro_windy != 0)
+			{
+				repaint_rysowanie_czasu_do_powrotu_windy(hWnd, hdc, ps, czas_do_powrotu_windy);
+				czas_do_powrotu_windy = czas_po_ktorym_pusta_winda_zjezdza_na_parter;
+			}
+			
 			if (aktualna_pozycja_windy > (ilosc_pieter - docelowe_pietro_windy)*150)
 			{
 				aktualna_pozycja_windy = aktualna_pozycja_windy - 5;
@@ -1374,7 +1065,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				
 				repaint_wysiadajacy(hWnd, hdc, ps);
 				
 				repaint_wsiadajacy(hWnd, hdc, ps);
@@ -1385,12 +1075,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case TMR_2:
 			//force window to repaint
-			if (docelowe_pietro_windy == ilosc_pieter - aktualna_pozycja_windy / 150)
+			if(docelowe_pietro_windy!=0 && czas_do_powrotu_windy>0)czas_do_powrotu_windy--;
+			repaint_rysowanie_czasu_do_powrotu_windy(hWnd, hdc, ps, czas_do_powrotu_windy);
+			if (docelowe_pietro_windy == ilosc_pieter - (aktualna_pozycja_windy / 150) && czas_do_powrotu_windy==0)
 			{
 				docelowe_pietro_windy = 0;
 				SetTimer(hWnd, TMR_1, 1, 0);
+				KillTimer(hWnd, TMR_2);
 			}
-			KillTimer(hWnd, TMR_2);
 			break;
 		}
 
