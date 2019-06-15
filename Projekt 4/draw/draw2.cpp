@@ -583,20 +583,33 @@ void repaint_ludzik(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 	EndPaint(hWnd, &ps);
 }
 
+/*
 void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int ilosc_wsiadajacych, int pozycja_x)
 {
 	RECT drawArea;
 
-	drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + pozycja_x, aktualna_pozycja_windy - 4};
+	drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + pozycja_x, aktualna_pozycja_windy - 4 };
 
 	InvalidateRect(hWnd, &drawArea, TRUE);
 	hdc = BeginPaint(hWnd, &ps);
 
-	for (int i = 0; i < ilosc_wsiadajacych; i++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - i) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy/150)][i]);
+	for (int i = 0; i < ilosc_wsiadajacych; i++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - i) * 40 - 30 + pozycja_x, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy / 150)][i]);
 
 	Sleep(100);
 
 	EndPaint(hWnd, &ps);
+}
+*/
+void usuwanie_docelowych_pietr_windy()
+{
+	for (int i = 0; i < docelowe_pietra_windy.size(); i++)
+	{
+		if (docelowe_pietra_windy[i] == ilosc_pieter - (aktualna_pozycja_windy/150))
+		{
+			docelowe_pietra_windy.erase(docelowe_pietra_windy.begin() + i);
+			i--;
+		}
+	}
 }
 
 void wysiadanie_pasazerow()
@@ -627,7 +640,6 @@ int sortowanie_wysiadaj¹cych()
 			tablica_pasazerow[i] = swap_tab;
 		}
 	}
-	//if(tablica_pasazerow.size()>1)rozmiar--;
 
 	return rozmiar;
 }
@@ -694,48 +706,12 @@ void repaint_zamykanie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int poz
 	}
 }
 
-void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
-{	
-	if (sprawdzanie_czy_ktos_wysiada() == true)
-	{
-		int ilosc_wysiadajacych = sortowanie_wysiadaj¹cych();
-		repaint_winda(hWnd, hdc, ps);
-		repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych*40 + 25);
-		
-		
-		RECT drawArea;
-
-		for (int i = 0; i < 150 + ilosc_wysiadajacych*40; i = i + 5)
-		{
-			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
-
-			InvalidateRect(hWnd, &drawArea, TRUE);
-			hdc = BeginPaint(hWnd, &ps);
-
-			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j)* 40 + maksymalna_ilosc_oczekujacych * 40 - 20 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
-
-			Sleep(100);
-		}
-
-		wysiadanie_pasazerow();
-
-		repaint_winda(hWnd, hdc, ps);
-
-		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 25);
-
-		EndPaint(hWnd, &ps);
-	}
-	
-	
-}
-
-
-
 int sprawdzanie_ilosci_oczekujacych_na_pietrze(int pietro)
 {
 	int i = 0;
 	while (tablica_oczekujacych[pietro][i] >= 0 && i < maksymalna_ilosc_oczekujacych)i++;
 	return i;
+
 }
 
 void dodawanie_docelowych_pietr_windy()
@@ -753,13 +729,13 @@ void wsiadanie_pasazerow()
 {
 	int rozmiar_tablicy_przed = tablica_pasazerow.size();
 
-	if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) < (maksymalny_udzwig_windy / srednia_waga_czlowieka)-tablica_pasazerow.size())
+	if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) < (maksymalny_udzwig_windy / srednia_waga_czlowieka)- rozmiar_tablicy_przed)
 	{
 		for (int i = 0; i < sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]); i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietra_windy[0]][i]);
 	}
 	else
 	{
-		for (int i = 0; i < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size(); i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietra_windy[0]][i]);
+		for (int i = 0; i < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - rozmiar_tablicy_przed; i++)tablica_pasazerow.push_back(tablica_oczekujacych[docelowe_pietra_windy[0]][i]);
 	}
 	
 	for (int i = 0; i < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size() + rozmiar_tablicy_przed; i++)
@@ -773,46 +749,100 @@ void wsiadanie_pasazerow()
 	}
 }
 
-
-
-/*
-void repaintData(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+void repaint_pozostali_oczekujacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int ilosc_wsiadajacych)
 {
-	InvalidateRect(hWnd, &drawArea3, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-	//Rysowanie_danych(hdc, dane[value]);
-	EndPaint(hWnd, &ps);
+	int ilosc_pozosta³ych_oczekujacych = sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]);
+	
+	if (ilosc_pozosta³ych_oczekujacych > 0)
+	{
+		RECT drawArea;
+
+		drawArea = { 0, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10, aktualna_pozycja_windy - 4 };
+
+		InvalidateRect(hWnd, &drawArea, TRUE);
+		hdc = BeginPaint(hWnd, &ps);
+
+		for (int j = 0; j < ilosc_pozosta³ych_oczekujacych; j++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - j) * 40 - 30, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy / 150)][j]);
+
+		Sleep(100);
+
+		EndPaint(hWnd, &ps);
+	}
 }
 
-void repaintLiczba_zbednych_pomiarow(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
-	InvalidateRect(hWnd, &drawArea_liczba_zbednych_pomiarow, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-	//Rysowanie_zbednych_pomiarow(hdc);
-	EndPaint(hWnd, &ps);
+	int ilosc_wsiadajacych = sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]);
+
+	if (ilosc_wsiadajacych > 0)
+	{
+		repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
+
+		if (ilosc_wsiadajacych > (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size())
+		{
+			ilosc_wsiadajacych = (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size();
+		}
+
+		RECT drawArea;
+
+		for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
+		{
+			drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 + i, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + i, aktualna_pozycja_windy - 4 };
+
+			InvalidateRect(hWnd, &drawArea, TRUE);
+			hdc = BeginPaint(hWnd, &ps);
+
+			for (int j = 0; j < ilosc_wsiadajacych; j++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - j) * 40 - 30 + i, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy / 150)][j]);
+
+			Sleep(100);
+
+			EndPaint(hWnd, &ps);
+		};
+
+		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
+
+		wsiadanie_pasazerow();
+
+		repaint_pozostali_oczekujacy(hWnd, hdc, ps, ilosc_wsiadajacych);
+	}
 }
 
-void repaintPrzedzialka_czasowa(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
+void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
-	InvalidateRect(hWnd, &drawArea_przedzialka_czasowa, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-	//Rysowanie_przedzialki_czasowej(hdc);
-	EndPaint(hWnd, &ps);
-}
+	if (sprawdzanie_czy_ktos_wysiada() == true)
+	{
+		Sleep(200);
+		int ilosc_wysiadajacych = sortowanie_wysiadaj¹cych();
+		repaint_winda(hWnd, hdc, ps);
+		Sleep(200);
+		repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 25);
 
-void repaintDane_niezalezne_od_czasu(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
-{
-	InvalidateRect(hWnd, &drawArea_zegar, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-	//Rysowanie_zegar(hdc);
-	EndPaint(hWnd, &ps);
 
-	InvalidateRect(hWnd, &drawArea_os, TRUE);
-	hdc = BeginPaint(hWnd, &ps);
-	//Rysowanie_osi(hdc);
-	EndPaint(hWnd, &ps);
+		RECT drawArea;
+
+		for (int i = 0; i < 150 + ilosc_wysiadajacych * 40; i = i + 5)
+		{
+			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
+
+			InvalidateRect(hWnd, &drawArea, TRUE);
+			hdc = BeginPaint(hWnd, &ps);
+
+			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j) * 40 + maksymalna_ilosc_oczekujacych * 40 - 20 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
+
+			Sleep(100);
+		}
+
+		wysiadanie_pasazerow();
+
+		repaint_winda(hWnd, hdc, ps);
+
+		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 25);
+
+		EndPaint(hWnd, &ps);
+	}
+
+
 }
-*/
 
 int OnCreate(HWND window)
 {
@@ -1351,35 +1381,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			else
 			{
 				
-				if(tablica_pasazerow.size()>0)repaint_wysiadajacy(hWnd, hdc, ps);
+				repaint_wysiadajacy(hWnd, hdc, ps);
 				
-				if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) > 0)
-				{
-					repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
-
-
-					//wsiadanie
-					if (sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]) < (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size())
-					{
-						for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
-						{
-							repaint_wsiadajacy(hWnd, hdc, ps, sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietra_windy[0]), i);
-						};
-					}
-					else
-					{
-						for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
-						{
-							repaint_wsiadajacy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size(), i);
-						};
-					}
-
-					repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
-
-					wsiadanie_pasazerow();
-				}
+				repaint_wsiadajacy(hWnd, hdc, ps);
 				
-				docelowe_pietra_windy.erase(docelowe_pietra_windy.begin());
+				usuwanie_docelowych_pietr_windy();
 
 				if (docelowe_pietra_windy.size() == 0 && tablica_pasazerow.size()==0)
 				{
@@ -1398,7 +1404,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				docelowe_pietra_windy.push_back(0);
 				SetTimer(hWnd, TMR_1, 1, 0);
-				
 			}
 			KillTimer(hWnd, TMR_2);
 			break;
