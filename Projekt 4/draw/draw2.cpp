@@ -3,9 +3,7 @@
 
 #include "stdafx.h"
 #include "draw2.h"
-#include <vector>
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 #include <math.h>
 #include <gdiplus.h>
@@ -723,6 +721,39 @@ void dodawanie_docelowych_pietr_windy()
 		docelowe_pietra_windy.push_back(aktualny_numer_pietra_ludzik);
 		sort(docelowe_pietra_windy.begin(), docelowe_pietra_windy.end());
 	}
+
+	int aktualne_pietro_windy = ilosc_pieter - aktualna_pozycja_windy / 150;
+
+	int preferencja = 0;			//"+" -> góra; "-" -> dó³;
+	
+	docelowe_pietra_windy[0] = -1;
+
+	for (int i = 1; i < 4 && docelowe_pietra_windy[0] == -1; i++)
+	{
+		for (int j = 0; j < tablica_pasazerow.size() && docelowe_pietra_windy[0] == -1; j++)
+		{
+			if (abs(tablica_pasazerow[j] - aktualne_pietro_windy) == i)docelowe_pietra_windy[0] = tablica_pasazerow[j];
+		}
+
+		if (docelowe_pietra_windy[0] == -1 && i == 1)
+		{	
+			for (int j = 0; j < tablica_pasazerow.size(); j++)
+			{
+				if (tablica_pasazerow[j] > aktualne_pietro_windy)preferencja++;
+				else if (tablica_pasazerow[j] < aktualne_pietro_windy)preferencja--;
+			}
+		}
+
+		if (aktualne_pietro_windy - i >= 0 && aktualne_pietro_windy - 1 <= 4 && docelowe_pietra_windy[0] == -1 && preferencja < 0)
+		{
+			if(sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualne_pietro_windy - i) > 0)docelowe_pietra_windy[0]=aktualne_pietro_windy-1;
+		}
+
+		if (aktualne_pietro_windy + i >= 0 && aktualne_pietro_windy + 1 <= 4 && docelowe_pietra_windy[0] == -1 && preferencja >= 0)
+		{
+			if (sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualne_pietro_windy - i) > 0)docelowe_pietra_windy[0] = aktualne_pietro_windy - 1;
+		}
+	}
 }
 
 void wsiadanie_pasazerow()
@@ -850,7 +881,6 @@ int OnCreate(HWND window)
 	{
 		for (int j = 0; j < maksymalna_ilosc_oczekujacych; j++)tablica_oczekujacych[i][j] = -1;
 	}
-
 	return 0;
 }
 
