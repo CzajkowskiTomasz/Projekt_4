@@ -790,7 +790,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 1;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 		
@@ -802,7 +801,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 2;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 		
@@ -814,7 +812,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 3;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 		
@@ -826,7 +823,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 4;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0); 
 			break;
 
@@ -839,7 +835,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 0;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -851,7 +846,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 2;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -863,7 +857,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 3;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -875,7 +868,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 4;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -888,7 +880,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 0;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -900,7 +891,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 1;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -912,7 +902,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 3;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -924,7 +913,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 4;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -937,7 +925,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 0;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -949,7 +936,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 1;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -961,7 +947,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 2;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -973,7 +958,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 4;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -986,7 +970,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 0;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -998,7 +981,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 1;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -1010,7 +992,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 2;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
@@ -1022,7 +1003,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				tablica_oczekujacych[aktualny_numer_pietra_ludzik][pozycja_w_kolejce] = 3;
 				repaint_ludzik(hWnd, hdc, ps);
 			}
-			dodawanie_docelowych_pietr_windy(hWnd);
 			SetTimer(hWnd, TMR_1, 1, 0);
 			break;
 
