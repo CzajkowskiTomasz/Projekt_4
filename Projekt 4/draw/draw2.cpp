@@ -353,7 +353,7 @@ void repaint_otwieranie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int po
 		hdc = BeginPaint(hWnd, &ps);
 
 		otwieranie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
-		Sleep(5);
+		Sleep(2);
 
 		EndPaint(hWnd, &ps);
 	}
@@ -371,7 +371,7 @@ void repaint_zamykanie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int poz
 		hdc = BeginPaint(hWnd, &ps);
 
 		zamykanie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
-		Sleep(5);
+		Sleep(2);
 
 		EndPaint(hWnd, &ps);
 	}
@@ -563,7 +563,7 @@ void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 	else wysiadanie = true;
 }
 
-void funkcja_przycisk(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int numer_1, int numer_2)
+void funkcja_przycisk(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, const int numer_1, const int numer_2)
 {
 	aktualny_numer_pietra_ludzik = numer_1;
 	pozycja_w_kolejce = sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualny_numer_pietra_ludzik);
@@ -939,6 +939,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				docelowe_pietro_windy = ilosc_pieter - aktualna_pozycja_windy / 150;
 			}
 			
+			if (docelowe_pietro_windy == 0 && aktualny_numer_pietra_ludzik > 0 && sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualny_numer_pietra_ludzik) > 0 && tablica_pasazerow.size()==0 && aktualna_pozycja_windy != 750)
+			{
+				docelowe_pietro_windy = aktualny_numer_pietra_ludzik;
+			}
+			
 			if (aktualna_pozycja_windy > (ilosc_pieter - docelowe_pietro_windy)*150)
 			{
 				aktualna_pozycja_windy = aktualna_pozycja_windy - 5;
@@ -971,7 +976,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case TMR_2:
 			//force window to repaint
-			if (dodawanie_pietr == true && wysiadanie == true && wysiadanie == true && docelowe_pietro_windy == ilosc_pieter - (aktualna_pozycja_windy / 150) && tablica_pasazerow.size() == 0)
+			if (dodawanie_pietr == true && wsiadanie == true && wysiadanie == true && docelowe_pietro_windy == ilosc_pieter - (aktualna_pozycja_windy / 150) && tablica_pasazerow.size() == 0)
 			{
 				if (docelowe_pietro_windy != 0 && czas_do_powrotu_windy > 0)czas_do_powrotu_windy--;
 				repaint_rysowanie_czasu_do_powrotu_windy(hWnd, hdc, ps, czas_do_powrotu_windy);
