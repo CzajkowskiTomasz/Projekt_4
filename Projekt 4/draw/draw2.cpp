@@ -17,11 +17,6 @@
 #define TMR_3 3
 #define TMR_4 4
 
-#define M_PI 3.14159265358979323846
-#define liczba_danych_w_probce 12
-#define promien_kola_wskazowek 80
-#define liczba_pomiarow 625
-
 #define ilosc_pieter 5
 #define maksymalna_ilosc_oczekujacych 10
 #define maksymalny_udzwig_windy 600                       //w kg
@@ -382,7 +377,6 @@ int sprawdzanie_ilosci_oczekujacych_na_pietrze(int pietro)
 	int i = 0;
 	while (tablica_oczekujacych[pietro][i] >= 0 && i < maksymalna_ilosc_oczekujacych)i++;
 	return i;
-
 }
 
 void dodawanie_docelowych_pietr_windy(HWND hWnd)
@@ -420,12 +414,6 @@ void dodawanie_docelowych_pietr_windy(HWND hWnd)
 		}	
 	}
 	dodawanie_pietr = true;
-	//if (aktualna_pozycja_windy != 750 && docelowe_pietro_windy == aktualne_pietro_windy)
-	//{
-		//SetTimer(hWnd, TMR_2, 1000, 0);
-		//KillTimer(hWnd, TMR_1);
-		//powrot = true;
-	//}
 }
 
 void wsiadanie_pasazerow()
@@ -491,32 +479,7 @@ void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 		koncowa_pozycja_x_animacji = ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 10;
 
 		KillTimer(hWnd, TMR_1);
-		//KillTimer(hWnd, TMR_2);
 		SetTimer(hWnd, TMR_3, 1, 0);
-
-		/*
-		RECT drawArea;
-
-		for (int i = 0; i < ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - tablica_pasazerow.size()) * 40 + 15; i = i + 10)
-		{
-			drawArea = { (maksymalna_ilosc_oczekujacych - ilosc_wsiadajacych) * 40 + i, aktualna_pozycja_windy - 75, (maksymalna_ilosc_oczekujacych) * 40 + 10 + i, aktualna_pozycja_windy - 4 };
-
-			InvalidateRect(hWnd, &drawArea, TRUE);
-			hdc = BeginPaint(hWnd, &ps);
-
-			for (int j = 0; j < ilosc_wsiadajacych; j++)rysowanie_ludzika(hdc, (maksymalna_ilosc_oczekujacych - j) * 40 - 30 + i, aktualna_pozycja_windy - 65, tablica_oczekujacych[ilosc_pieter - (aktualna_pozycja_windy / 150)][j]);
-
-			Sleep(100);
-
-			EndPaint(hWnd, &ps);
-		};
-
-		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
-
-		wsiadanie_pasazerow();
-
-		repaint_pozostali_oczekujacy(hWnd, hdc, ps, ilosc_wsiadajacych);
-		*/
 	}
 	else wsiadanie = true;
 }
@@ -535,30 +498,7 @@ void repaint_wysiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 		koncowa_pozycja_x_animacji = 150 + ilosc_osob_animacja * 40;
 
 		KillTimer(hWnd, TMR_1);
-		//KillTimer(hWnd, TMR_2);
 		SetTimer(hWnd, TMR_4, 1, 0);
-	/*
-		RECT drawArea;
-
-		for (int i = 0; i < 150 + ilosc_wysiadajacych * 40; i = i + 5)
-		{
-			drawArea = { ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - ilosc_wysiadajacych) * 40 + maksymalna_ilosc_oczekujacych * 40 + 16 + i, aktualna_pozycja_windy - 75, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 15 + i, aktualna_pozycja_windy - 4 };
-
-			InvalidateRect(hWnd, &drawArea, TRUE);
-			hdc = BeginPaint(hWnd, &ps);
-
-			for (int j = 0; j < ilosc_wysiadajacych; j++)rysowanie_ludzika(hdc, ((maksymalny_udzwig_windy / srednia_waga_czlowieka) - j) * 40 + maksymalna_ilosc_oczekujacych * 40 - 19 + i, aktualna_pozycja_windy - 65, tablica_pasazerow[j]);
-
-			EndPaint(hWnd, &ps);
-			Sleep(100);
-		}
-
-		wysiadanie_pasazerow();
-
-		repaint_winda(hWnd, hdc, ps);
-
-		repaint_zamykanie_drzwi_windy(hWnd, hdc, ps, (maksymalny_udzwig_windy / srednia_waga_czlowieka) * 40 + maksymalna_ilosc_oczekujacych * 40 + 25);
-	*/
 	}
 	else wysiadanie = true;
 }
@@ -985,8 +925,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					docelowe_pietro_windy = 0;
 					wsiadanie = false;
 					wysiadanie = false;
-					//SetTimer(hWnd, TMR_1, 1, 0);
-					//KillTimer(hWnd, TMR_2);
 				}
 			}
 			else
