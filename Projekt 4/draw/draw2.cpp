@@ -348,7 +348,7 @@ void repaint_otwieranie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int po
 		hdc = BeginPaint(hWnd, &ps);
 
 		otwieranie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
-		Sleep(2);
+		Sleep(1);
 
 		EndPaint(hWnd, &ps);
 	}
@@ -366,7 +366,7 @@ void repaint_zamykanie_drzwi_windy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps, int poz
 		hdc = BeginPaint(hWnd, &ps);
 
 		zamykanie_drzwi_windy(hdc, pozycja_x, aktualna_pozycja_windy - i);
-		Sleep(2);
+		Sleep(1);
 
 		EndPaint(hWnd, &ps);
 	}
@@ -467,7 +467,7 @@ void repaint_wsiadajacy(HWND hWnd, HDC &hdc, PAINTSTRUCT &ps)
 {
 	ilosc_osob_animacja = sprawdzanie_ilosci_oczekujacych_na_pietrze(docelowe_pietro_windy);
 
-	if (ilosc_osob_animacja > 0)
+	if (ilosc_osob_animacja > 0 && tablica_pasazerow.size() < maksymalny_udzwig_windy / srednia_waga_czlowieka)
 	{
 		repaint_otwieranie_drzwi_windy(hWnd, hdc, ps, maksymalna_ilosc_oczekujacych * 40 + 10);
 
@@ -874,12 +874,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case TMR_1:
 			//force window to repaint				
-			if (tablica_pasazerow.size() < maksymalny_udzwig_windy/srednia_waga_czlowieka && aktualna_pozycja_windy % 150 == 0 && sprawdzanie_ilosci_oczekujacych_na_pietrze(ilosc_pieter - aktualna_pozycja_windy / 150) > 0)
+			if (tablica_pasazerow.size() < maksymalny_udzwig_windy/srednia_waga_czlowieka && aktualna_pozycja_windy % 150 == 0  && sprawdzanie_ilosci_oczekujacych_na_pietrze(ilosc_pieter - aktualna_pozycja_windy / 150) > 0)
 			{
 				docelowe_pietro_windy = ilosc_pieter - aktualna_pozycja_windy / 150;
 			}
 			
-			if (docelowe_pietro_windy == 0 && aktualny_numer_pietra_ludzik > 0 && sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualny_numer_pietra_ludzik) > 0 && tablica_pasazerow.size()==0 && aktualna_pozycja_windy != 750)
+			if (tablica_pasazerow.size() < maksymalny_udzwig_windy / srednia_waga_czlowieka && docelowe_pietro_windy == 0 && aktualny_numer_pietra_ludzik > 0 && sprawdzanie_ilosci_oczekujacych_na_pietrze(aktualny_numer_pietra_ludzik) > 0 && tablica_pasazerow.size()==0 && aktualna_pozycja_windy != 750)
 			{
 				docelowe_pietro_windy = aktualny_numer_pietra_ludzik;
 			}
